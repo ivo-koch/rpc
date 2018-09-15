@@ -1,0 +1,2 @@
+BAPNodeID 	 parentNodeID 	 objectiveIncumbentSolution 	 nodeBound 	 nodeValue 	 cgIterations 	 t_master 	 t_pricing 	 nrGenColumns 	 solutionStatus 	 nodesInQueue
+0	-1	166	154.0	154.00	1	22	8398	0	INTEGER	0
