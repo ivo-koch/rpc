@@ -2,10 +2,12 @@ package tests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Random;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -66,7 +68,7 @@ class RectangleUtilsTest {
 		assertTrue(matrix.isMaximal(res));
 	}
 
-	@Test
+	//@Test
 	void testBuildMaximal2() {
 
 		Random r = new Random();
@@ -79,4 +81,27 @@ class RectangleUtilsTest {
 				}
 	}
 
+	@Test
+	void testAllMaximals() {
+
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("0 1 0 1 0 0 1\n");
+		sb.append("0 1 1 1 1 0 1\n");
+		sb.append("1 1 1 1 1 0 1\n");
+		sb.append("0 1 1 1 1 0 1\n");
+		sb.append("0 1 0 1 0 0 1\n");
+		sb.append("0 1 0 1 0 0 1\n");
+
+		Matriz m = new Matriz(sb.toString());
+
+		Set<Rectangle> maximals = m.allMaximals();
+		
+		assertEquals(5, maximals.size());
+		assertTrue(maximals.contains(new Rectangle(1, 0, 1, 6)));
+		assertTrue(maximals.contains(new Rectangle(3, 0, 1, 6)));
+		assertTrue(maximals.contains(new Rectangle(6, 0, 1, 6)));
+		assertTrue(maximals.contains(new Rectangle(0, 2, 5, 1)));
+		assertTrue(maximals.contains(new Rectangle(1, 1, 4, 3)));
+	}
 }

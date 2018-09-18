@@ -4,7 +4,9 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Matriz {
 
@@ -42,6 +44,22 @@ public class Matriz {
 		}
 	}
 
+	@Override
+	public String toString() {
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("\n");
+		for (int f = 0; f < filas(); f++) {
+			for (int c = 0; c < columnas(); c++)
+				if (matrix[f][c])
+					sb.append("1 ");
+				else
+					sb.append("0 ");
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+
 	public boolean get(int i, int j) {
 		return matrix[i][j];
 	}
@@ -61,7 +79,30 @@ public class Matriz {
 	public int cantUnos() {
 		return unos.size();
 	}
-
+	
+	
+	public Set<Rectangle> allMaximals(){
+		
+		Set<Rectangle> maximals = new HashSet<Rectangle>();
+		
+		for (Point p : unos)
+			maximals.add(buildMaximal(p));
+		
+		return maximals;		
+	}
+	
+	public double weight(Rectangle r, double[] coef) {
+		
+		double weight = 0;
+		int i = 0;
+		for (Point p : unos) {			
+			if (r.contains(p))
+				weight += coef[i];
+			i++;
+		}
+			
+		return weight;
+	}
 	/***
 	 * Construye un rectangulo maximal hecho de unos que incluya la posición que nos
 	 * indican.

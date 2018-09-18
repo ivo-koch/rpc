@@ -56,7 +56,7 @@ public final class BranchAndPrice extends AbstractBranchAndPrice<RPCDataModel, R
      * */
     @Override
     protected boolean isIntegerNode(BAPNode<RPCDataModel, RPCColumn> node) {
-        
+            	
     	return dataModel.MijConCubrimientoFrac == null;
     }
 }

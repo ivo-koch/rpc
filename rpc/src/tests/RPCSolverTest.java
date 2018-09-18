@@ -14,7 +14,7 @@ import rpc.branch.and.price.RPCSolver;
 
 class RPCSolverTest {
 
-	@Test
+	//@Test
 	void testSolver1() {
 
 		StringBuilder sb = new StringBuilder();
@@ -35,8 +35,8 @@ class RPCSolverTest {
 	@Test
 	void testSolver2() {
 
-		for (int f = 40; f < 41; f++)
-			for (int c = 40; c < 41; c++)
+		for (int f = 10; f < 41; f++)
+			for (int c = 10; c < 41; c++)
 				for (int density = 10; density < 100; density += 10) {
 					Matriz matrix = MatrixGenerator.generateRandomMatrix(f, c, density);
 					RPCSolver rpc = new RPCSolver(matrix);

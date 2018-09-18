@@ -100,6 +100,7 @@ public final class RPCMaster extends AbstractMaster<RPCDataModel, RPCColumn, RPC
 	@Override
 	protected boolean solveMasterProblem(long timeLimit) throws TimeLimitExceededException {
 		try {
+			logger.debug(dataModel.matriz.toString());
 			// Eliminamos el último dato de cubrimiento fraccionario de algun constraint
 			dataModel.MijConCubrimientoFrac = null;
 			dataModel.valorCubrimientoFrac = -1;
@@ -140,6 +141,7 @@ public final class RPCMaster extends AbstractMaster<RPCDataModel, RPCColumn, RPC
 						break;
 					}
 				}
+				printSolution();
 			}
 		} catch (IloException e) {
 			e.printStackTrace();
@@ -156,7 +158,7 @@ public final class RPCMaster extends AbstractMaster<RPCDataModel, RPCColumn, RPC
 	@Override
 	public void initializePricingProblem(RPCPricingProblem pricingProblem) {
 		try {
-
+			
 			double[] duales = new double[dataModel.matriz.cantUnos()];
 
 			int i = 0;
@@ -188,8 +190,12 @@ public final class RPCMaster extends AbstractMaster<RPCDataModel, RPCColumn, RPC
 			// Esto es, tiene que figurar en cada constraint correspondiente a cada uno de
 			// los unos.
 			for (int f = column.rectangle.y; f < column.rectangle.y + column.rectangle.height; f++)
-				for (int c = column.rectangle.x; c < column.rectangle.x + column.rectangle.width; c++)
-					iloColumn = iloColumn.and(masterData.cplex.column(constraints.get(new Point(c, f)), 1.0));
+				for (int c = column.rectangle.x; c < column.rectangle.x + column.rectangle.width; c++) {
+					IloRange range = constraints.get(new Point(c, f));
+					if (range == null)
+						throw new RuntimeException("El punto " +  c + "," + f + "no está en el map");
+					iloColumn = iloColumn.and(masterData.cplex.column(range, 1.0));
+				}
 
 			// Creamos la variable para esa columna, y la guardamos
 			IloNumVar var = masterData.cplex.numVar(iloColumn, 0, Double.MAX_VALUE, column.toString());
