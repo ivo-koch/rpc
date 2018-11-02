@@ -18,7 +18,7 @@
 	<classpathentry kind="lib" path="jgraphx-2.0.0.1.jar"/>
 	<classpathentry kind="lib" path="jorlib-core-1.1.1-javadoc.jar"/>
 	<classpathentry kind="lib" path="jorlib-core-1.1.1-sources.jar"/>
-	<classpathentry kind="lib" path="jorlib-core-1.1.1.jar"/>
+	<classpathentry kind="lib" path="jorlib-core-1.1.1.jar" sourcepath="jorlib-core-1.1.1-sources.jar"/>
 	<classpathentry kind="lib" path="jorlib-demo-1.1.1-javadoc.jar"/>
 	<classpathentry kind="lib" path="jorlib-demo-1.1.1-sources.jar"/>
 	<classpathentry kind="lib" path="jorlib-demo-1.1.1.jar"/>

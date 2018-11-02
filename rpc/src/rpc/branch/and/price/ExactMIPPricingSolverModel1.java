@@ -30,8 +30,7 @@ public final class ExactMIPPricingSolverModel1 {
 	private IloNumVar[][] b;
 	private IloNumVar[][] x;
 
-	private Matriz matriz;
-	private double[] fobjCoef;
+	private Matriz matriz;	
 	private Logger logger;
 	private double precision;
 	private double objective;
@@ -56,7 +55,7 @@ public final class ExactMIPPricingSolverModel1 {
 	 * Construye el problema de pricing: en nuestro caso, encontrar un árbol
 	 * generador de mínimo peso, con pesos en los vértices.
 	 */
-	private void buildModel() {
+	public void buildModel() {
 		try {
 			cplex = new IloCplex();
 			cplex.setParam(IloCplex.IntParam.AdvInd, 0);
@@ -98,9 +97,10 @@ public final class ExactMIPPricingSolverModel1 {
 
 					cplex.addLe(lhs, 0.0, "Const1");
 				}
-			
-			//subto cerosEnRectangulos: forall <i,j> in R*C:
-		    //1 - x[i,j] <= 2 - (sum <i1, j1> in R*C with i1 <= i and j1 <= j: a[i1, j1]) - (sum <i1, j1> in R*C with i1 >= i and j1 >= j : b[i1, j1]);
+
+			// subto cerosEnRectangulos: forall <i,j> in R*C:
+			// 1 - x[i,j] <= 2 - (sum <i1, j1> in R*C with i1 <= i and j1 <= j: a[i1, j1]) -
+			// (sum <i1, j1> in R*C with i1 >= i and j1 >= j : b[i1, j1]);
 			for (int f = 0; f < matriz.filas(); f++)
 				for (int c = 0; c < matriz.columnas(); c++) {
 					IloNumExpr lhs = cplex.linearIntExpr();
@@ -116,9 +116,9 @@ public final class ExactMIPPricingSolverModel1 {
 
 					cplex.addLe(lhs, 1.0, "Const2");
 				}
-			
-			//subto unos: forall <i,j,k> in R*C:
-			//    x[i,j] <= M[i,j];
+
+			// subto unos: forall <i,j,k> in R*C:
+			// x[i,j] <= M[i,j];
 			for (int f = 0; f < matriz.filas(); f++)
 				for (int c = 0; c < matriz.columnas(); c++) {
 					IloNumExpr lhs = cplex.linearIntExpr();
@@ -126,29 +126,28 @@ public final class ExactMIPPricingSolverModel1 {
 
 					cplex.addLe(lhs, matriz.get(f, c) ? 1.0 : 0.0, "Const3");
 				}
-		
-			//subto unInicioRectanguloPorPosicion:
-			//    sum <i, j> in R*C : a[i, j] == 1;			
+
+			// subto unInicioRectanguloPorPosicion:
+			// sum <i, j> in R*C : a[i, j] == 1;
 			IloNumExpr lhsC4 = cplex.linearIntExpr();
-			
+
 			for (int f = 0; f < matriz.filas(); f++)
 				for (int c = 0; c < matriz.columnas(); c++)
 					lhsC4 = cplex.sum(lhsC4, cplex.prod(1.0, a[f][c]));
 
 			cplex.addEq(lhsC4, 1.0, "Const4");
-			
-			
-			//subto unFinRectanguloPorPosicion:
-		    //sum <i, j> in R*C : b[i, j] == 1;
-			
+
+			// subto unFinRectanguloPorPosicion:
+			// sum <i, j> in R*C : b[i, j] == 1;
+
 			IloNumExpr lhsC5 = cplex.linearIntExpr();
-			
+
 			for (int f = 0; f < matriz.filas(); f++)
 				for (int c = 0; c < matriz.columnas(); c++)
 					lhsC5 = cplex.sum(lhsC5, cplex.prod(1.0, b[f][c]));
 
 			cplex.addEq(lhsC5, 1.0, "Const5");
-			
+
 		} catch (IloException e) {
 			e.printStackTrace();
 		}
@@ -161,86 +160,77 @@ public final class ExactMIPPricingSolverModel1 {
 	 * @throws TimeLimitExceededException
 	 *             TimeLimitExceededException
 	 */
-	public boolean solve() throws TimeLimitExceededException {
+	public boolean solve() throws TimeLimitExceededException, IloException {
 
-		try {
+		Estadisticas.llamadasExacto++;
+		this.objective = Double.MIN_VALUE;
 
-			Estadisticas.llamadasExacto++;
-
-			logger.debug("Resolviendo pricing...");
-			// Resolvemos el problema
-			if (!cplex.solve() || cplex.getStatus() != IloCplex.Status.Optimal) {
-				if (cplex.getCplexStatus() == IloCplex.CplexStatus.AbortTimeLim) {
-					throw new TimeLimitExceededException();
-				} else if (cplex.getStatus() == IloCplex.Status.Infeasible) {
-					this.objective = Double.MIN_VALUE;
-					return false;
-				} else {
-					throw new RuntimeException("Pricing problem solve failed! Status: " + cplex.getStatus());
-				}
-			} else { // Encontramos un óptimo
-				logger.debug("Pricing resuelto");
-				this.objective = cplex.getObjValue();
-
-				return true;
+		logger.debug("Resolviendo pricing...");
+		// Resolvemos el problema
+		if (!cplex.solve() || cplex.getStatus() != IloCplex.Status.Optimal) {
+			if (cplex.getCplexStatus() == IloCplex.CplexStatus.AbortTimeLim) {
+				throw new TimeLimitExceededException();
+			} else if (cplex.getStatus() == IloCplex.Status.Infeasible) {
+				this.objective = Double.MIN_VALUE;
+				return false;
+			} else {
+				throw new RuntimeException("Pricing problem solve failed! Status: " + cplex.getStatus());
 			}
-		} catch (IloException e) {
-			e.printStackTrace();
-			return false;
+		} else { // Encontramos un óptimo
+			logger.debug("Pricing resuelto");
+			this.objective = cplex.getObjValue();
+
+			return true;
 		}
 	}
 
 	public Rectangle getColumn() throws UnknownObjectException, IloException {
 
-		// podemos agregar el resultado a la base?
-		if (objective > 1 - precision) { // - config.PRECISION) {
-			// SI
-			// si es así, agregamos una nueva columna representada por este rectángulo
-			// a la base
-			int topX = -1;
-			int topY = -1;
+		// SI
+		// si es así, agregamos una nueva columna representada por este rectángulo
+		// a la base
+		int topX = -1;
+		int topY = -1;
 
-			int bottomRightX = -1;
-			int bottomRightY = -1;
-			boolean found = false;
-			StringBuilder rectSol = new StringBuilder();
-			rectSol.append("\n");
+		int bottomRightX = -1;
+		int bottomRightY = -1;
+		boolean found = false;
+		StringBuilder rectSol = new StringBuilder();
+		rectSol.append("\n");
 
-			for (int f = 0; f < matriz.filas(); f++) {
-				for (int c = 0; c < matriz.columnas(); c++) {		
-					if (cplex.getValue(a[f][c]) >= 1 - precision) {
-						bottomRightX = c;
-						bottomRightY = f;
-					}
-					if (cplex.getValue(b[f][c]) >= 1 - precision) {
-						topX = c;
-						topY = f;
-					}
-					if (cplex.getValue(x[f][c]) >= 1 - precision) {
-						rectSol.append("1* ");
-						found = true;
-					} else					
-						if (matriz.get(f, c))
-							rectSol.append("1  ");
-						else
-							rectSol.append("0  ");
+		for (int f = 0; f < matriz.filas(); f++) {
+			for (int c = 0; c < matriz.columnas(); c++) {
+				if (cplex.getValue(a[f][c]) >= 1 - precision) {
+					topX = c;
+					topY = f;
 				}
-				rectSol.append("\n");
+				if (cplex.getValue(b[f][c]) >= 1 - precision) {
+					bottomRightX = c;
+					bottomRightY = f;
+				}
+				if (cplex.getValue(x[f][c]) >= 1 - precision) {
+					rectSol.append("1* ");
+					found = true;
+				} else if (matriz.get(f, c))
+					rectSol.append("1  ");
+				else
+					rectSol.append("0  ");
 			}
-
-			if (!found)
-				throw new RuntimeException("No encontramos rectángulo en la solución!");
-
-			logger.debug(rectSol.toString());
-			logger.debug("Obj: " + objective);
-			// logger.debug(dumpModel());
-
-			Rectangle encontrado = new Rectangle(topX, topY, bottomRightX - topX + 1, bottomRightY - topY + 1);
-
-			Estadisticas.columnasExacto++;
-			return encontrado;
+			rectSol.append("\n");
 		}
-		return null;
+
+		if (!found)
+			throw new RuntimeException("No encontramos rectángulo en la solución!");
+
+		logger.debug(rectSol.toString());
+		logger.debug("Obj: " + objective);
+		// logger.debug(dumpModel());
+
+		Rectangle encontrado = new Rectangle(topX, topY, bottomRightX - topX + 1, bottomRightY - topY + 1);
+
+		Estadisticas.columnasExacto++;
+		return encontrado;
+
 	}
 
 	/**
@@ -251,8 +241,7 @@ public final class ExactMIPPricingSolverModel1 {
 	public void setObjective(double[] fobjCoef) {
 
 		try {
-
-			this.fobjCoef = fobjCoef;
+			
 			// maximize fobj: sum <i, j> in R*C: (start[i, j] + diag[i, j] + up[i, j] +
 			// left[i, j])*X0[i, j];
 			logger.debug("Duals: " + Arrays.toString(fobjCoef));

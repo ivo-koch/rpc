@@ -11,7 +11,6 @@ import java.util.Properties;
 
 import org.jorlib.frameworks.columnGeneration.branchAndPrice.AbstractBranchCreator;
 import org.jorlib.frameworks.columnGeneration.io.SimpleBAPLogger;
-import org.jorlib.frameworks.columnGeneration.io.SimpleDebugger;
 import org.jorlib.frameworks.columnGeneration.pricing.AbstractPricingProblemSolver;
 import org.jorlib.frameworks.columnGeneration.util.Configuration;
 
@@ -71,7 +70,7 @@ public class RPCSolver {
 		bap.warmStart(initSolution.size(), initSolution);
 
 		// OPTIONAL: Attach a debugger
-		SimpleDebugger sd = new SimpleDebugger(bap, true);
+		//SimpleDebugger sd = new SimpleDebugger(bap, true);
 
 		// OPTIONAL: Attach a logger to the Branch-and-Price procedure.
 		new SimpleBAPLogger(bap, new File("output.log"));

@@ -58,17 +58,17 @@ class ExactMIPPricingSolverTest {
 						}						
 					}
 					
-					if (maxWeight <= 1 - solver.getPrecision()) {
-						assertTrue(solver.getColumn() == null);
+					if (maxWeight <= 1 - solver.getPrecision())
 						assertTrue(solver.getObjective() <= 1 - solver.getPrecision());
-					}
+					
 					else {						
 						assertTrue(solver.getColumn() != null);
 						//assertTrue(maximals.contains(solver.getColumn()));
 						double w = matrix.weight(best, fobjCoef);
-						if (Math.abs(w - solver.getObjective()) > solver.getPrecision())
-							throw new RuntimeException("Para poner un breakpoint");
+//						if (Math.abs(w - solver.getObjective()) > solver.getPrecision())
+//							throw new RuntimeException("Para poner un breakpoint");
 						assertEquals(maxWeight, solver.getObjective(), solver.getPrecision());
+						assertEquals(maxWeight, matrix.weight(solver.getColumn(), fobjCoef), solver.getPrecision());
 					}
 					
 					solver.close();

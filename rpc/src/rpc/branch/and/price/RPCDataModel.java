@@ -1,8 +1,6 @@
 package rpc.branch.and.price;
 
 import java.awt.Point;
-import java.util.Collections;
-import java.util.List;
 
 import org.jorlib.frameworks.columnGeneration.model.ModelInterface;
 

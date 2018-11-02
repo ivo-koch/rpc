@@ -35,7 +35,7 @@ public final class RPCMaster extends AbstractMaster<RPCDataModel, RPCColumn, RPC
 	private Map<Point, Interval> constraintRanges;
 
 	public RPCMaster(RPCDataModel dataModel, RPCPricingProblem pricingProblem) {
-		super(dataModel, pricingProblem, OptimizationSense.MINIMIZE);	
+		super(dataModel, pricingProblem, OptimizationSense.MINIMIZE);
 		System.out.println("Master constructor. Columns: " + masterData.getNrColumns());
 	}
 
@@ -124,8 +124,8 @@ public final class RPCMaster extends AbstractMaster<RPCDataModel, RPCColumn, RPC
 
 				// Nos guardamos la información de cubrimiento.
 				for (Point p : dataModel.matriz.unos()) {
-					//TODO: Ver esto con Javi
-					IloRange range = constraints.get(p);		
+					// TODO: Ver esto con Javi
+					IloRange range = constraints.get(p);
 					double cantRectQueCubre = masterData.cplex.getValue(range.getExpr());
 					// nos fijamos si el resultado es fraccionario.
 					if ((cantRectQueCubre > Math.floor(cantRectQueCubre) + TOLERANCIA)) {
@@ -158,7 +158,7 @@ public final class RPCMaster extends AbstractMaster<RPCDataModel, RPCColumn, RPC
 	@Override
 	public void initializePricingProblem(RPCPricingProblem pricingProblem) {
 		try {
-			
+
 			double[] duales = new double[dataModel.matriz.cantUnos()];
 
 			int i = 0;
@@ -193,7 +193,7 @@ public final class RPCMaster extends AbstractMaster<RPCDataModel, RPCColumn, RPC
 				for (int c = column.rectangle.x; c < column.rectangle.x + column.rectangle.width; c++) {
 					IloRange range = constraints.get(new Point(c, f));
 					if (range == null)
-						throw new RuntimeException("El punto " +  c + "," + f + "no está en el map");
+						throw new RuntimeException("El punto " + c + "," + f + "no está en el map");
 					iloColumn = iloColumn.and(masterData.cplex.column(range, 1.0));
 				}
 
@@ -238,7 +238,12 @@ public final class RPCMaster extends AbstractMaster<RPCDataModel, RPCColumn, RPC
 	public void printSolution() {
 		List<RPCColumn> solution = this.getSolution();
 		for (RPCColumn is : solution)
-			System.out.println(is);
+			try {
+				System.out.println(is + "Val:" + masterData.cplex.getValue(masterData.getVar(is)));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 
 	/**

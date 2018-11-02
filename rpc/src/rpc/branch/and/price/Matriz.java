@@ -79,30 +79,41 @@ public class Matriz {
 	public int cantUnos() {
 		return unos.size();
 	}
-	
-	
-	public Set<Rectangle> allMaximals(){
-		
-		Set<Rectangle> maximals = new HashSet<Rectangle>();
-		
-		for (Point p : unos)
-			maximals.add(buildMaximal(p));
-		
-		return maximals;		
+
+	private boolean todosUnos(Rectangle r) {
+		return todosUnos(r.y, r.x, r.width, r.height);
 	}
-	
+
+	public Set<Rectangle> allMaximals() {
+
+		Set<Rectangle> maximals = new HashSet<Rectangle>();
+
+		// genero todos los subrectángulos
+		for (int f = 0; f < filas(); f++)
+			for (int c = 0; c < columnas(); c++)
+				for (int f1 = f; f1 < filas(); f1++)
+					for (int c1 = c; c1 < columnas(); c1++) {
+						Rectangle r = new Rectangle(c, f, c1 - c + 1, f1 - f + 1);
+						if (todosUnos(r) && isMaximal(r))
+							maximals.add(r);
+					}
+
+		return maximals;
+	}
+
 	public double weight(Rectangle r, double[] coef) {
-		
+
 		double weight = 0;
 		int i = 0;
-		for (Point p : unos) {			
+		for (Point p : unos) {
 			if (r.contains(p))
 				weight += coef[i];
 			i++;
 		}
-			
+
 		return weight;
 	}
+
 	/***
 	 * Construye un rectangulo maximal hecho de unos que incluya la posición que nos
 	 * indican.
@@ -113,162 +124,43 @@ public class Matriz {
 	 */
 	public Rectangle buildMaximal(Point p) {
 
-		int yMin = Integer.MIN_VALUE;
-		int yMax = Integer.MAX_VALUE;
+		return buildMaximal(new Rectangle(p.x, p.y, 1, 1));
+	}
 
-		int xMax = Integer.MAX_VALUE;
-		int xMin = p.x;
+	private boolean todosUnos(int f, int c, int width, int height) {
 
-		int filas = matrix.length;
-		int columnas = matrix[0].length;
+		for (int f1 = f; f1 < f + height; f1++)
+			for (int c1 = c; c1 < c + width; c1++)
+				if (!matrix[f1][c1])
+					return false;
 
-		int c = p.x;
-		// nos movemos a derecha todo lo que podemos, hasta encontrar un 0.
-		while (c < columnas && matrix[p.y][c]) {
-
-			// procesamos ahora la columna donde estamos.
-			// vamos hacia arriba todo lo que podemos, hasta encontrar un 0
-			int f = p.y;
-
-			while (f >= 0 && matrix[f][c])
-				f--;
-
-			// es este valor la última columna con un 1, hacia arriba.
-			int yCol = f + 1;
-
-			// nos vamos quedando con el maximo, de todas las columnas que miramos.
-			yMin = Math.max(yMin, yCol);
-
-			// vamos ahora hacia abajo todo lo que podemos, hasta encontrar un 0
-			f = p.y;
-			while (f < filas && matrix[f][c])
-				f++;
-
-			// es este valor la última columna con un 1, hacia abajo.
-			yCol = f - 1;
-
-			// nos vamos quedando con el minimo hacia abajo, de todas las columnas que
-			// miramos.
-			yMax = Math.min(yMax, yCol);
-
-			c++;
-		}
-
-		xMax = c - 1;
-		// ahora hacemos lo mismo, pero moviéndonos a izquierda
-		c = p.x - 1;
-		while (c >= 0 && matrix[p.y][c]) {
-			// procesamos ahora la columna donde estamos.
-			// vamos hacia arriba todo lo que podemos, hasta encontrar un 0
-			int f = p.y;
-
-			while (f >= 0 && matrix[f][c])
-				f--;
-
-			// es este valor la última columna con un 1, hacia arriba.
-			int yCol = f + 1;
-
-			// nos vamos quedando con el minimo, de todas las columnas que miramos.
-			yMin = Math.max(yMin, yCol);
-
-			// vamos ahora hacia abajo todo lo que podemos, hasta encontrar un 0
-			f = p.y;
-			while (f < filas && matrix[f][c])
-				f++;
-
-			// es este valor la última columna con un 1, hacia abajo.
-			yCol = f - 1;
-
-			// nos vamos quedando con el minimo hacia abajo, de todas las columnas que
-			// miramos.
-			yMax = Math.min(yMax, yCol);
-
-			c--;
-		}
-
-		xMin = c + 1;
-
-		return new Rectangle(xMin, yMin, (xMax - xMin + 1), (yMax - yMin + 1));
+		return true;
 	}
 
 	public Rectangle buildMaximal(Rectangle r) {
 
-		int yMin = Integer.MIN_VALUE;
-		int yMax = Integer.MAX_VALUE;
-
-		int xMax = Integer.MAX_VALUE;
-		int xMin = r.x;
-
 		int filas = matrix.length;
 		int columnas = matrix[0].length;
 
-		int c = r.x;
-		// nos movemos a derecha todo lo que podemos, hasta encontrar un 0.
-		while (c < columnas && matrix[r.y][c]) {
+		int minY = r.y;
+		int maxY = r.y + r.height;
+		int minX = r.x;
+		int maxX = r.x + r.width;
 
-			// procesamos ahora la columna donde estamos.
-			// vamos hacia arriba todo lo que podemos, hasta encontrar un 0
-			int f = r.y;
+		for (int f = r.y - 1; f >= 0 && todosUnos(f, r.x, r.width, 1); f--)
+			minY--;
 
-			while (f >= 0 && matrix[f][c])
-				f--;
+		for (int f = r.y + r.height; f < filas && todosUnos(f, r.x, r.width, 1); f++)
+			maxY++;
 
-			// es este valor la última columna con un 1, hacia arriba.
-			int yCol = f + 1;
+		for (int c = r.x + r.width; c < columnas && todosUnos(minY, c, 1, maxY - minY); c++)
+			maxX++;
 
-			// nos vamos quedando con el minimo, de todas las columnas que miramos.
-			yMin = Math.max(yMin, yCol);
+		for (int c = r.x - 1; c >= 0 && todosUnos(minY, c, 1, maxY - minY); c--)
+			minX--;
 
-			// vamos ahora hacia abajo todo lo que podemos, hasta encontrar un 0
-			f = r.y + r.height;
-			while (f < filas && matrix[f][c])
-				f++;
+		return new Rectangle(minX, minY, maxX - minX, maxY - minY);
 
-			// es este valor la última columna con un 1, hacia abajo.
-			yCol = f - 1;
-
-			// nos vamos quedando con el minimo hacia abajo, de todas las columnas que
-			// miramos.
-			yMax = Math.min(yMax, yCol);
-
-			c++;
-		}
-
-		xMax = c - 1;
-		// ahora hacemos lo mismo, pero moviéndonos a izquierda
-		c = r.x - 1;
-		while (c >= 0 && matrix[r.y][c]) {
-			// procesamos ahora la columna donde estamos.
-			// vamos hacia arriba todo lo que podemos, hasta encontrar un 0
-			int f = r.y;
-
-			while (f >= 0 && matrix[f][c])
-				f--;
-
-			// es este valor la última columna con un 1, hacia arriba.
-			int yCol = f + 1;
-
-			// nos vamos quedando con el minimo, de todas las columnas que miramos.
-			yMin = Math.max(yMin, yCol);
-
-			// vamos ahora hacia abajo todo lo que podemos, hasta encontrar un 0
-			f = r.y + r.height;
-			while (f < filas && matrix[f][c])
-				f++;
-
-			// es este valor la última columna con un 1, hacia abajo.
-			yCol = f - 1;
-
-			// nos vamos quedando con el minimo hacia abajo, de todas las columnas que
-			// miramos.
-			yMax = Math.min(yMax, yCol);
-
-			c--;
-		}
-
-		xMin = c + 1;
-
-		return new Rectangle(xMin, yMin, (xMax - xMin + 1), (yMax - yMin + 1));
 	}
 
 	public boolean isMaximal(Rectangle r) {
@@ -280,58 +172,20 @@ public class Matriz {
 		int columnas = matrix[0].length;
 
 		// miramos la cara de arriba.
-		int fila = r.y - 1;
-
-		if (fila >= 0) {
-			boolean todosUnos = true;
-			for (int c = r.x; c < r.x + r.width; c++)
-				if (!matrix[fila][c]) {
-					todosUnos = false;
-					break;
-				}
-			if (todosUnos)
-				return false;
-		}
-
-		fila = r.y + r.height;
+		if (r.y - 1 >= 0 && todosUnos(r.y - 1, r.x, r.width, 1))
+			return false;
 
 		// miramos la cara de abajo
-		if (fila < filas) {
-			boolean todosUnos = true;
-			for (int c = r.x; c < r.x + r.width; c++)
-				if (!matrix[fila][c]) {
-					todosUnos = false;
-					break;
-				}
-			if (todosUnos)
-				return false;
-		}
+		if (r.y + r.height < filas && todosUnos(r.y + r.height, r.x, r.width, 1))
+			return false;
 
 		// miramos la cara de la izquierda
-		int columna = r.x - 1;
-		if (columna >= 0) {
-			boolean todosUnos = true;
-			for (int f = r.y; f < r.y + r.height; f++)
-				if (!matrix[f][columna]) {
-					todosUnos = false;
-					break;
-				}
-			if (todosUnos)
-				return false;
-		}
+		if (r.x - 1 >= 0 && todosUnos(r.y, r.x - 1, 1, r.height))
+			return false;
 
 		// miramos la cara de la derecha
-		columna = r.x + r.width;
-		if (columna < columnas) {
-			boolean todosUnos = true;
-			for (int f = r.y; f < r.y + r.height; f++)
-				if (!matrix[f][columna]) {
-					todosUnos = false;
-					break;
-				}
-			if (todosUnos)
-				return false;
-		}
+		if (r.x + r.width < columnas && todosUnos(r.y, r.x + r.width, 1, r.height))
+			return false;
 
 		return true;
 	}

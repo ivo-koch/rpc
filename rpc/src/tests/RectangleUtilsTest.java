@@ -68,7 +68,7 @@ class RectangleUtilsTest {
 		assertTrue(matrix.isMaximal(res));
 	}
 
-	//@Test
+	@Test
 	void testBuildMaximal2() {
 
 		Random r = new Random();
