@@ -19,7 +19,7 @@ public class MatrixGenerator {
 
 		int cantUnos = (int) Math.floor(filas * columnas * density / 100.0);
 
-		Random r = new Random();
+		Random r = new Random(0);
 
 		for (int i = 1; i <= cantUnos; i++) {
 			int pos = r.nextInt(puntos.size());
