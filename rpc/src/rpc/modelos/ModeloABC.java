@@ -17,11 +17,11 @@ public final class ModeloABC extends Modelo {
 	private IloNumVar[][][] c;
 
 	public ModeloABC(Matriz matrix, int k) throws Exception {
-		super(matrix, k, 0.0, null);
+		super(matrix, k, 0.01, null);
 	}
 	
 	public ModeloABC(Matriz matrix, int k, OutputStream out) throws Exception {
-		super(matrix, k, 0.0, out);
+		super(matrix, k, 0.01, out);
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public final class ModeloABC extends Modelo {
 				int maxY = Integer.MIN_VALUE;
 				for (int f = 0; f < matriz.filas(); f++)
 					for (int col = 0; col < matriz.columnas(); col++)
-						if (cplex.getValue(c[f][col][k]) > 0) {
+						if (cplex.getValue(c[f][col][k]) > precision) {
 							minX = Integer.min(minX, col);
 							minY = Integer.min(minY, f);
 							maxX = Integer.max(maxX, col);

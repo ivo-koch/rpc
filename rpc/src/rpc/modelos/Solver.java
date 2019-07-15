@@ -1,5 +1,6 @@
 package rpc.modelos;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -38,40 +39,74 @@ public class Solver {
 
 		out = new FileWriter("salida");
 		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin-2/image_0220.jpg")).filter(Files::isRegularFile)
-				.forEach(Solver::resolver);
+				.forEach(Solver::resolverConZoom);
 
 		if (out != null)
 			out.close();
 	}
 
-	private static void resolver(Path path) {
+	private static void resolverConZoom(Path path) {
 
-		String absPath = path.toAbsolutePath().toString();		
+		String absPath = path.toAbsolutePath().toString();
 		try {
 			Matriz m = ImportadorImagenes.importar(path);
 
-			List<Matriz> matrices = m.descomponer(8);
+			Matriz mat = m.zoom(100);
+			int tamSol = mat.heurCover().size();
+			ModeloRC modelo = new ModeloRC(mat, tamSol);
+			//Modelo modeloXY = new ModeloXY(mat, tamSol);
+			// new FileOutputStream("./out/" + path.getFileName().toString() + ".txt"));
+			modelo.buildModel();
 			
-			
-			for (Matriz mat : matrices) {
-				
-				if (mat.cantUnos() == 0 || mat.cantUnos() == mat.filas() * mat.columnas())
-					continue;
-					
-				Modelo modeloXY = new ModeloXY(mat, mat.allMaximals().size());
-						//new FileOutputStream("./out/" + path.getFileName().toString() + ".txt"));
-				modeloXY.buildModel();
-				boolean res = modeloXY.solve();
-				if (!res)
-					throw new RuntimeException("cagada");
-				System.out.println("Resolviendo matriz");
-				//out.write(absPath + ", " + res + ", " + modeloXY.getObjective() + ", ");
-				//out.flush();
-				modeloXY.close();
-			}
+			System.out.println("Modelo construido");
+			boolean res = modelo.solve();
+			if (!res)
+				throw new RuntimeException("cagada");
+			System.out.println("Resolviendo matriz");
+			// out.write(absPath + ", " + res + ", " + modeloXY.getObjective() + ", ");
+			// out.flush();
+			modelo.close();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	private static void resolverConDesc(Path path) {
+
+		String absPath = path.toAbsolutePath().toString();
+		try {
+			Matriz m = ImportadorImagenes.importar(path);
+
+			
+			List<List<Matriz>> mat = m.descomponer(8);
+			int mod = 1;
+			for(List<Matriz> fila:mat)
+				for(Matriz matriz: fila)
+				{					
+					if (matriz.cantUnos() == matriz.filas() * matriz.columnas())
+						continue;
+					
+					if (matriz.cantUnos() == 0)
+						continue;
+						
+					int tamSol = matriz.heurCover().size();
+					Modelo modeloXY = new ModeloXY(matriz, tamSol);
+					// new FileOutputStream("./out/" + path.getFileName().toString() + ".txt"));
+					modeloXY.buildModel();
+			
+					System.out.println("Modelo construido " + mod++ + " .");
+					boolean res = modeloXY.solve();
+					if (!res)
+						throw new RuntimeException("cagada");
+					System.out.println("Matriz resuelta");
+					// 	out.write(absPath + ", " + res + ", " + modeloXY.getObjective() + ", ");
+					// 	out.flush();
+					modeloXY.close();
+				}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

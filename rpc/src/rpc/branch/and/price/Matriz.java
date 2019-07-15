@@ -30,7 +30,7 @@ public class Matriz {
 	// Devuelve la matriz a partir de una submatriz válida.
 	public Matriz(Matriz m, Rectangle r) {
 		this.matrix = m.matrix;
-		if (r.getMinX() < 0 || r.getMaxX() >= matrix[0].length || r.getMinY() < 0 || r.getMaxY() >= matrix.length)
+		if (r.x < 0 || r.x >= matrix[0].length || r.width > matrix[0].length || r.height > matrix.length)
 			throw new RuntimeException("Rango del rectángulo no válido");
 
 		this.limite = r;
@@ -64,7 +64,7 @@ public class Matriz {
 		sb.append("\n");
 		for (int f = 0; f < filas(); f++) {
 			for (int c = 0; c < columnas(); c++)
-				if (matrix[f][c])
+				if (get(f, c))
 					sb.append("1 ");
 				else
 					sb.append("0 ");
@@ -74,12 +74,16 @@ public class Matriz {
 	}
 
 	public boolean enRango(int i, int j) {
-		return (i >= limite.y && i < filas() && j >= limite.x && j < columnas());
+		return (i >= 0 && i < filas() && j >= 0 && j < columnas());
 	}
 
 	public boolean get(int i, int j) {
 		if (!enRango(i, j))
 			throw new RuntimeException("(" + i + "," + j + ") no es válida");
+
+		if (limite.y + i >= matrix.length || limite.x + j >= matrix[0].length)
+			throw new RuntimeException("(" + limite.y + " + " + i + "," + limite.x + " + " + j + ") no es válida");
+
 		return matrix[limite.y + i][limite.x + j];
 	}
 
@@ -161,8 +165,7 @@ public class Matriz {
 
 		return true;
 	}
-	
-	
+
 	public Rectangle buildMaximal(Rectangle r) {
 
 		int filas = filas();
@@ -216,17 +219,79 @@ public class Matriz {
 		return true;
 	}
 
-	public List<Matriz> descomponer(int tamanio) {
-		
-		List<Matriz> res = new ArrayList<Matriz>();
+	public List<List<Matriz>> descomponer(int tamanio) {
+
+		List<List<Matriz>> res = new ArrayList<List<Matriz>>();
 
 		for (int f = 0; f < filas(); f += tamanio) {
-			int height = f + tamanio > filas()? filas() - f: tamanio; 
-			for (int c = 0; c < columnas(); c += tamanio) {	
-				int width = c + tamanio > columnas()? columnas() - c: tamanio;					
-				res.add(new Matriz(this, new Rectangle(f, c, width, height)));
-			}		
+			List<Matriz> fila = new ArrayList<Matriz>();
+			res.add(fila);
+			int height = f + tamanio > filas() ? filas() - f : tamanio;
+			for (int c = 0; c < columnas(); c += tamanio) {
+				int width = c + tamanio > columnas() ? columnas() - c : tamanio;
+				Rectangle r = new Rectangle(c, f, width, height);
+				fila.add(new Matriz(this, r));
+				//System.out.println(r);
+			}
 		}
 		return res;
+	}
+
+	public Matriz zoom(int tamanio) {
+
+		List<List<Matriz>> res = descomponer(10);
+		boolean[][] mat = new boolean[res.size()][res.get(0).size()];
+
+		int f = 0;
+		int c = 0;
+		for (List<Matriz> fila : res) {
+			for (Matriz elem : fila)
+				mat[f][c++] = elem.cantUnos() >= elem.filas() * elem.columnas() / 2.0;
+			f++;
+			c = 0;
+		}
+
+		return new Matriz(mat);
+	}
+
+	public List<Rectangle> heurCover() {
+		List<Rectangle> sol = new ArrayList<Rectangle>();
+
+		boolean[][] unosCubiertos = new boolean[filas()][columnas()];
+
+		int cantUnosCubiertos = 0;
+
+		int[] unosPorFilas = new int[filas()];
+
+		for (Point p : unos())
+			unosPorFilas[p.y]++;
+
+		while (cantUnosCubiertos < cantUnos()) {
+
+			int fila = -1;
+			for (int f = 0; f < filas(); f++)
+				if (unosPorFilas[f] > 0)
+					fila = f;
+
+			Point p = null;
+
+			for (int c = 0; c < columnas(); c++)
+				if (!unosCubiertos[fila][c] && this.get(fila, c))
+					p = new Point(c, fila);
+
+			Rectangle r = buildMaximal(p);
+
+			for (int f = r.y; f < r.y + r.height; f++)
+				for (int c = r.x; c < r.x + r.width; c++) {
+					if (!unosCubiertos[f][c]) {
+						cantUnosCubiertos++;
+						unosPorFilas[f]--;
+					}
+					unosCubiertos[f][c] = true;
+				}
+			sol.add(r);
+		}
+
+		return sol;
 	}
 }

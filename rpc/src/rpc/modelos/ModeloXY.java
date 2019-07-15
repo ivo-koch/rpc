@@ -17,11 +17,11 @@ public final class ModeloXY extends Modelo {
 	
 
 	public ModeloXY(Matriz matrix, int k) throws Exception {
-		super(matrix, k, 0.0, null);
+		super(matrix, k, 0.01, null);
 	}
 	
 	public ModeloXY(Matriz matrix, int k, OutputStream out) throws Exception {
-		super(matrix, k, 0.0, out);
+		super(matrix, k, 0.01, out);
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public final class ModeloXY extends Modelo {
 		List<Rectangle> rects = new ArrayList<Rectangle>();
 		
 		for(int k = 0; k < this.k; k++)
-			if (cplex.getValue(y[k]) > 0)
+			if (cplex.getValue(y[k]) > precision)
 			{
 				int minX = Integer.MAX_VALUE;
 				int minY = Integer.MAX_VALUE;
@@ -130,7 +130,7 @@ public final class ModeloXY extends Modelo {
 				int maxY = Integer.MIN_VALUE;
 				for (int f = 0; f < matriz.filas(); f++)
 					for (int c = 0; c < matriz.columnas(); c++)
-						if (cplex.getValue(x[f][c][k]) > 0) {
+						if (cplex.getValue(x[f][c][k]) > precision) {
 							minX = Integer.min(minX, c);
 							minY = Integer.min(minY, f);
 							maxX = Integer.max(maxX, c);

@@ -19,12 +19,12 @@ public final class ModeloSUDL extends Modelo {
 	
 
 	public ModeloSUDL(Matriz matrix, int k) throws Exception {		
-		super(matrix, k, 0.0, null);				
+		super(matrix, k, 0.01, null);				
 		matriz = new MatrizConBorde(matrix);
 	}
 	
 	public ModeloSUDL(Matriz matrix, int k, OutputStream out) throws Exception {		
-		super(matrix, k, 0.0, out);				
+		super(matrix, k, 0.01, out);				
 		matriz = new MatrizConBorde(matrix);
 	}
 

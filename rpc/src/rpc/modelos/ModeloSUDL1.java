@@ -22,11 +22,11 @@ public final class ModeloSUDL1 extends Modelo {
 	
 
 	public ModeloSUDL1(Matriz matrix, int k) throws Exception {		
-		super(matrix, k, 0.0, null);
+		super(matrix, k, 0.01, null);
 	}
 	
 	public ModeloSUDL1(Matriz matrix, int k, OutputStream out) throws Exception {		
-		super(matrix, k, 0.0, out);
+		super(matrix, k, 0.01, out);
 	}
 
 	@Override
@@ -251,13 +251,13 @@ public final class ModeloSUDL1 extends Modelo {
 		for(int k = 0; k < this.k; k++) 
 			for (int f = 0; f < matriz.filas(); f++)
 				for (int col = 0; col < matriz.columnas(); col++) {
-					if (cplex.getValue(start[f][col][k]) > 0)
+					if (cplex.getValue(start[f][col][k]) > precision)
 						System.out.println("start["+ f + ", " + col + ", " + k + "]");
-					if (cplex.getValue(left[f][col][k]) > 0)
+					if (cplex.getValue(left[f][col][k]) > precision)
 						System.out.println("left["+ f + ", " + col + ", " + k + "]");
-					if (cplex.getValue(up[f][col][k]) > 0)
+					if (cplex.getValue(up[f][col][k]) > precision)
 						System.out.println("up["+ f + ", " + col + ", " + k + "]");
-					if (cplex.getValue(diag[f][col][k]) > 0)
+					if (cplex.getValue(diag[f][col][k]) > precision)
 						System.out.println("diag["+ f + ", " + col + ", " + k + "]");
 				}
 
@@ -267,7 +267,7 @@ public final class ModeloSUDL1 extends Modelo {
 	public Solucion getSolution() throws UnknownObjectException, IloException {
 		
 		List<Rectangle> rects = new ArrayList<Rectangle>();
-		printCplexVars();
+		//printCplexVars();
 		for(int k = 0; k < this.k; k++) {
 				int minX = Integer.MAX_VALUE;
 				int minY = Integer.MAX_VALUE;
@@ -275,10 +275,10 @@ public final class ModeloSUDL1 extends Modelo {
 				int maxY = Integer.MIN_VALUE;
 				for (int f = 0; f < matriz.filas(); f++)
 					for (int col = 0; col < matriz.columnas(); col++)
-						if (cplex.getValue(start[f][col][k]) > 0 || 
-							cplex.getValue(up[f][col][k]) > 0 ||
-							cplex.getValue(left[f][col][k]) > 0 ||
-							cplex.getValue(diag[f][col][k]) > 0) {
+						if (cplex.getValue(start[f][col][k]) > precision || 
+							cplex.getValue(up[f][col][k]) > precision ||
+							cplex.getValue(left[f][col][k]) > precision ||
+							cplex.getValue(diag[f][col][k]) > precision) {
 							
 							minX = Integer.min(minX, col);
 							minY = Integer.min(minY, f);

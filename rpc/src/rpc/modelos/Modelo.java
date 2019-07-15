@@ -32,7 +32,8 @@ public abstract class Modelo {
 		cplex = new IloCplex();
 		cplex.setParam(IloCplex.IntParam.AdvInd, 0);
 		cplex.setParam(IloCplex.IntParam.Threads, 1);
-		cplex.setOut(out);
+		if (out != null)
+			cplex.setOut(out);
 		
 	   //cplex.setParam(IloCplex.IntParam.Reduce, 0);		
 		//cplex.setParam(IloCplex.IntParam.RelaxPreInd,0);
