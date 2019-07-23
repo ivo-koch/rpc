@@ -3,6 +3,7 @@ package rpc.modelos;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import rpc.branch.and.price.Matriz;
@@ -55,7 +56,7 @@ public class Solucion {
 		List<Rectangle> res = new ArrayList<Rectangle>();
 
 		for (Rectangle r : rectangulos)
-			if (matriz.todosUnos(new Rectangle(r.x, r.y, r.width, matriz.columnas() - r.y)))
+			if (matriz.todosUnos(new Rectangle(r.x, r.y, r.width, matriz.filas() - r.y)))
 				res.add(r);
 
 
@@ -84,13 +85,17 @@ public class Solucion {
 
 		return res;
 	}
-
 	
-	public Solucion mergeADerecha(Solucion s1) throws Exception {
-
+	
+	public Solucion mergeADerecha(Solucion s1, InfoResolucion info) throws Exception {
+		
+		
+		if (matriz.filas() != s1.matriz.filas())
+			throw new RuntimeException("Ambas matrices deben tener la misma cantidad de filas");
+		info.tiempoRes = System.currentTimeMillis();
 		List<Rectangle> res = new ArrayList<Rectangle>();
 		List<Rectangle> der = enBordeDerecho();
-		int offsetFilas = matriz.filas();		
+		int offsetColumnas = matriz.columnas();		
 
 		// agregamos los rectángulos de solucion que no están en el borde
 		for (Rectangle r : rectangulos) {
@@ -102,10 +107,10 @@ public class Solucion {
 		List<Rectangle> izq = s1.enBordeIzquierdo();
 		for (Rectangle r : s1.rectangulos)
 			if (!izq.contains(r))
-				res.add(new Rectangle(r.x + offsetFilas, r.y, r.width, r.height));
+				res.add(new Rectangle(r.x + offsetColumnas, r.y, r.width, r.height));
 
 		Matriz ampliada = new Matriz(matriz,
-				new Rectangle(0, 0, matriz.columnas() + s1.matriz.columnas(), matriz.filas() + s1.matriz.filas()));
+				new Rectangle(0, 0, matriz.columnas() + s1.matriz.columnas(), matriz.filas()));
 
 		List<Rectangle> aMergear = new ArrayList<Rectangle>();
 
@@ -116,7 +121,7 @@ public class Solucion {
 		// ahora, maximalizamos el rectángulo 'a izquierda'
 		for (Rectangle r : izq) {
 			//trasladamos las coordenadas a la matriz ampliada			
-			aMergear.add(ampliada.buildMaximal(new Rectangle(r.x + offsetFilas, r.y, r.width, r.height)));
+			aMergear.add(ampliada.buildMaximal(new Rectangle(r.x + offsetColumnas, r.y, r.width, r.height)));
 		}
 
 		// ahora, mergeamos
@@ -132,6 +137,7 @@ public class Solucion {
 		
 		
 		res.addAll(modelo.getSolution().getRectangulos());
+		info.tiempoRes = System.currentTimeMillis() - info.tiempoRes;
 		modelo.close();
 		
 		return new Solucion(ampliada, res);
@@ -139,11 +145,15 @@ public class Solucion {
 	
 
 	
-	public Solucion mergeAbajo(Solucion s1) throws Exception {
+	public Solucion mergeAbajo(Solucion s1, InfoResolucion info) throws Exception {
 
+		if (matriz.columnas() != s1.matriz.columnas())
+			throw new RuntimeException("Ambas matrices deben tener la misma cantidad de columnas");
+		
+		info.tiempoRes = System.currentTimeMillis();
 		List<Rectangle> res = new ArrayList<Rectangle>();
 		List<Rectangle> inf = enBordeInferior();		
-		int offsetColumnas = matriz.columnas();
+		int offsetFilas = matriz.filas();
 
 		// agregamos los rectángulos de solucion que no están en el borde
 		for (Rectangle r : rectangulos) {
@@ -155,10 +165,10 @@ public class Solucion {
 		List<Rectangle> sup = s1.enBordeSuperior();
 		for (Rectangle r : s1.rectangulos)
 			if (!sup.contains(r))
-				res.add(new Rectangle(r.x, r.y + offsetColumnas, r.width, r.height));
+				res.add(new Rectangle(r.x, r.y + offsetFilas, r.width, r.height));
 
 		Matriz ampliada = new Matriz(matriz,
-				new Rectangle(0, 0, matriz.columnas() + s1.matriz.columnas(), matriz.filas() + s1.matriz.filas()));
+				new Rectangle(0, 0, matriz.columnas(), matriz.filas() + s1.matriz.filas()));
 
 		List<Rectangle> aMergear = new ArrayList<Rectangle>();
 
@@ -169,7 +179,7 @@ public class Solucion {
 		// ahora, maximalizamos el rectángulo 'hacia arriba'
 		for (Rectangle r : sup) {
 			//trasladamos las coordenadas a la matriz ampliada			
-			aMergear.add(ampliada.buildMaximal(new Rectangle(r.x, r.y + offsetColumnas, r.width, r.height)));
+			aMergear.add(ampliada.buildMaximal(new Rectangle(r.x, r.y + offsetFilas, r.width, r.height)));
 		}
 
 		// ahora, mergeamos
@@ -183,8 +193,17 @@ public class Solucion {
 		modelo.close();
 		res.addAll(modelo.getSolution().getRectangulos());
 		
+		info.tiempoRes = System.currentTimeMillis() - info.tiempoRes;
 		return new Solucion(ampliada, res);
 
+	}
+
+	public List<Rectangle> getRectangulos() {
+		return Collections.unmodifiableList(rectangulos);
+	}
+
+	public Matriz getMatriz() {
+		return matriz;
 	}
 
 }

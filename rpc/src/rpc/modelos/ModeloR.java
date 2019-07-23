@@ -63,7 +63,7 @@ public final class ModeloR {
 			Set<Rectangle> rectQueLoContienen = matriz.getUnosEnRectangulos().get(uno);
 			IloNumExpr rest = cplex.linearIntExpr();
 			for (Rectangle rect : rectQueLoContienen)
-				rest = cplex.sum(rest, variables.get(rect));			
+				rest = cplex.sum(rest, variables.get(rect));
 			cplex.addLe(1.0, rest);
 		}
 
@@ -89,20 +89,21 @@ public final class ModeloR {
 		}
 	}
 
-	
 	public SolucionModeloR getSolution() throws UnknownObjectException, IloException {
-		
+
 		List<Rectangle> res = new ArrayList<Rectangle>();
-		
+
 		for (Rectangle rect : matriz.getRectangulosOriginales())
-			if (cplex.getValue(variables.get(rect)) > precision)
-				res.add(rect);
-	
+			try {
+				if (cplex.getValue(variables.get(rect)) > precision)
+					res.add(rect);
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
 
 		return new SolucionModeloR(matriz, res);
 
 	}
-	
 
 	/**
 	 * Cerrar el problema de pricing.
