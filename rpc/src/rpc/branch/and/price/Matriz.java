@@ -294,4 +294,8 @@ public class Matriz {
 
 		return sol;
 	}
+
+	public Rectangle getLimite() {
+		return limite;
+	}
 }

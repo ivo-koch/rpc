@@ -94,15 +94,13 @@ public final class ModeloR {
 		List<Rectangle> res = new ArrayList<Rectangle>();
 
 		for (Rectangle rect : matriz.getRectangulosOriginales())
-			try {
-				if (cplex.getValue(variables.get(rect)) > precision)
-					res.add(rect);
-			} catch (Exception ex) {
-				throw new RuntimeException(ex);
-			}
+			if (cplex.getValue(variables.get(rect)) > precision)
+				res.add(rect);
+
+		if (res.isEmpty())
+			throw new RuntimeException("Solucion vacia");
 
 		return new SolucionModeloR(matriz, res);
-
 	}
 
 	/**

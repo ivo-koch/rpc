@@ -110,7 +110,7 @@ public class Solucion {
 				res.add(new Rectangle(r.x + offsetColumnas, r.y, r.width, r.height));
 
 		Matriz ampliada = new Matriz(matriz,
-				new Rectangle(0, 0, matriz.columnas() + s1.matriz.columnas(), matriz.filas()));
+				new Rectangle(matriz.getLimite().x, matriz.getLimite().y, matriz.columnas() + s1.matriz.columnas(), matriz.filas()));
 
 		List<Rectangle> aMergear = new ArrayList<Rectangle>();
 
@@ -123,10 +123,21 @@ public class Solucion {
 			//trasladamos las coordenadas a la matriz ampliada			
 			aMergear.add(ampliada.buildMaximal(new Rectangle(r.x + offsetColumnas, r.y, r.width, r.height)));
 		}
+		
+		for (Rectangle r : aMergear)
+			if (!ampliada.todosUnos(r))
+				throw new RuntimeException("Rect no válido");
 
+		for (Rectangle r : res)
+			if (!ampliada.todosUnos(r))
+				throw new RuntimeException("Rect no válido");
+
+		
 		// ahora, mergeamos
-		if (aMergear.isEmpty())
+		if (aMergear.isEmpty()) {
+			info.tiempoRes = System.currentTimeMillis() - info.tiempoRes;
 			return new Solucion(ampliada, res);
+		}
 		
 		MatrizComprimida mc = new MatrizComprimida(aMergear);
 		
@@ -168,7 +179,7 @@ public class Solucion {
 				res.add(new Rectangle(r.x, r.y + offsetFilas, r.width, r.height));
 
 		Matriz ampliada = new Matriz(matriz,
-				new Rectangle(0, 0, matriz.columnas(), matriz.filas() + s1.matriz.filas()));
+				new Rectangle(matriz.getLimite().x, matriz.getLimite().y, matriz.columnas(), matriz.filas() + s1.matriz.filas()));
 
 		List<Rectangle> aMergear = new ArrayList<Rectangle>();
 
@@ -181,8 +192,17 @@ public class Solucion {
 			//trasladamos las coordenadas a la matriz ampliada			
 			aMergear.add(ampliada.buildMaximal(new Rectangle(r.x, r.y + offsetFilas, r.width, r.height)));
 		}
+		
+		for (Rectangle r : aMergear)
+			if (!ampliada.todosUnos(r))
+				throw new RuntimeException("Rect no válido");
 
 		// ahora, mergeamos
+		if (aMergear.isEmpty()) {
+			info.tiempoRes = System.currentTimeMillis() - info.tiempoRes;
+			return new Solucion(ampliada, res);
+		}
+		
 		MatrizComprimida mc = new MatrizComprimida(aMergear);
 		
 		ModeloR modelo = new ModeloR(mc, 0.01);
@@ -190,9 +210,9 @@ public class Solucion {
 		if (!modelo.solve())
 			throw new RuntimeException("No pudo mergear");
 		
-		modelo.close();
-		res.addAll(modelo.getSolution().getRectangulos());
 		
+		res.addAll(modelo.getSolution().getRectangulos());
+		modelo.close();
 		info.tiempoRes = System.currentTimeMillis() - info.tiempoRes;
 		return new Solucion(ampliada, res);
 

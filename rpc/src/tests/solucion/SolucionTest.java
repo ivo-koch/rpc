@@ -75,6 +75,8 @@ public class SolucionTest {
 		assertTrue(s3.getRectangulos().contains(new Rectangle(1, 2, 7, 1)));
 		assertTrue(s3.getRectangulos().contains(new Rectangle(6, 0, 2, 1)));
 		
+		assertTrue(s3.esValida());
+		
 	}
 
 	
