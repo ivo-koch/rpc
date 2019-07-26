@@ -23,6 +23,6 @@ class ImportarTest {
 
 	@Test
 	void testBinarizar() throws IOException {
-		ImportadorImagenes.binarizarDir("/home/ik/dev/vm shared/transit/textures/textures");	
+		ImportadorImagenes.binarizarDir("/home/ik/git/rpc/rpc/instancias/aerials");	
 	}
 }

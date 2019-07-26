@@ -40,7 +40,7 @@ public class ImportadorImagenes {
 	public static void buildFileDesc() throws IOException {
 		builder = new StringBuilder();
 		
-		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin"))
+		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin/aerials"))
         .filter(Files::isRegularFile)
         .forEach(ImportadorImagenes::printDesc);
 		

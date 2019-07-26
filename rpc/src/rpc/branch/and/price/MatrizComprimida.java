@@ -116,7 +116,9 @@ public class MatrizComprimida {
 	public Set<Rectangle> allRectangles() {
 
 		Set<Rectangle> rects = new HashSet<Rectangle>();
-
+		int itCnt = 0;
+		int total = xs.size()*xs.size()*ys.size()*ys.size();
+		
 		// genero todos los subrectángulos
 		for (int iX = 0; iX < xs.size(); iX++)
 			for (int iY = 0; iY < ys.size(); iY++)
@@ -129,6 +131,8 @@ public class MatrizComprimida {
 						Rectangle r = new Rectangle(x, y, x1 - x, y1 - x);
 						if (todosUnos(r))
 							rects.add(r);
+						itCnt++;
+						System.out.println("It" + itCnt + " de " + total);
 					}
 		return rects;
 	}

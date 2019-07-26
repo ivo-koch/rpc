@@ -83,7 +83,7 @@ class MatrizTests {
 				}
 	}
 
-	@Test
+	//@Test
 	void testAllMaximals() {
 
 		StringBuilder sb = new StringBuilder();
@@ -154,9 +154,17 @@ class MatrizTests {
 
 		Matriz m = new Matriz(sb.toString());
 
-		Solucion res = new Solucion(m, m.heurCover());
+		Solucion res = new Solucion(m, m.coverStandard());
+		Solucion res1 = new Solucion(m, m.coverInv());
+		Solucion res2 = new Solucion(m, m.coverInv2());
+		Solucion res3 = new Solucion(m, m.coverInv3());
+		Solucion res4 = new Solucion(m, m.coverShuffle());		
 
 		assertTrue(res.esValida());
+		assertTrue(res1.esValida());
+		assertTrue(res2.esValida());
+		assertTrue(res3.esValida());
+		assertTrue(res4.esValida());
 
 	}
 
@@ -166,12 +174,18 @@ class MatrizTests {
 		for (int f = 10; f < 150; f++)
 			for (int c = 10; c < 150; c++)
 				for (int density = 10; density < 100; density += 10) {
-					Matriz m = MatrixGenerator.generateRandomMatrix(f, c, density);
-					System.out.println("Resolviendo " + f + "," + c + ", d: " + density);
-					long start = System.currentTimeMillis();
-					Solucion res = new Solucion(m, m.heurCover());
-					System.out.println("Tiempo: " + (System.currentTimeMillis() - start));
+					Matriz m = MatrixGenerator.generateRandomMatrix(f, c, density);					
+					Solucion res = new Solucion(m, m.coverStandard());
+					Solucion res1 = new Solucion(m, m.coverInv());
+					Solucion res2 = new Solucion(m, m.coverInv2());
+					Solucion res3 = new Solucion(m, m.coverInv3());
+					Solucion res4 = new Solucion(m, m.coverShuffle());		
+
 					assertTrue(res.esValida());
+					assertTrue(res1.esValida());
+					assertTrue(res2.esValida());
+					assertTrue(res3.esValida());
+					assertTrue(res4.esValida());
 				}
 	}
 

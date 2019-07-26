@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,9 +29,10 @@ public class Solver {
 		String fileName = "instanceDesc.txt";
 
 		out = new FileWriter("salida");
+		out.write("Nombre, Filas, Columnas, Cant. unos, Heur st, Heur inv, Heur inv2, Heur inv3, Heur sh, Theur, TbuilM, Tsolve, Model \n");
 		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/short")).filter(Files::isRegularFile)
 				.forEach(Solver::resolverConDesc);
-
+		
 		if (out != null)
 			out.close();
 	}
@@ -42,7 +44,7 @@ public class Solver {
 			Matriz m = ImportadorImagenes.importar(path);
 
 			Matriz mat = m.zoom(100);
-			int tamSol = mat.heurCover().size();
+			int tamSol = mat.coverStandard().size();
 			ModeloRC modelo = new ModeloRC(mat, tamSol);
 			// Modelo modeloXY = new ModeloXY(mat, tamSol);
 			// new FileOutputStream("./out/" + path.getFileName().toString() + ".txt"));
@@ -65,32 +67,61 @@ public class Solver {
 	private static void resolverConDesc(Path path) {
 		
 		try {
+			StringBuilder output = new StringBuilder();
+			
 			Matriz m = ImportadorImagenes.importar(path);
 			
-			List<Rectangle> sol = m.heurCover();
-			Solucion nueva = new Solucion(m, sol);
-			if (!nueva.esValida())
-				throw new RuntimeException("solucion no valida");
+			output.append(path.getFileName().toString() + ", ");
+			output.append(m.filas() + ", " + m.columnas() + ", " + m.cantUnos() + ", ");
+			long tiempoInicial = System.currentTimeMillis();
 			
-			int tam = sol.size();			
+			List<Rectangle> sol = m.coverStandard();
+			//Solucion nueva = new Solucion(m, sol);
+			//if (!nueva.esValida())
+			//	throw new RuntimeException("solucion no valida");						
 			
 			MatrizComprimida mc = new MatrizComprimida(sol);
-			Set<Rectangle> all = mc.splitEachRectangle(20);
+			Set<Rectangle> conjuntoExpandido = new HashSet<Rectangle>(sol);
+			output.append(conjuntoExpandido.size() + ", ");
 			
-			mc = new MatrizComprimida(new ArrayList<Rectangle>(all));
+			conjuntoExpandido.addAll(m.coverInv());
+			output.append(conjuntoExpandido.size() + ", ");
+			
+			conjuntoExpandido.addAll(m.coverInv2());
+			output.append(conjuntoExpandido.size() + ", ");
+			
+			conjuntoExpandido.addAll(m.coverInv3());
+			output.append(conjuntoExpandido.size() + ", ");
+			
+			conjuntoExpandido.addAll(m.coverShuffle());
+			output.append(conjuntoExpandido.size() + ", ");
+			
+			output.append((System.currentTimeMillis() - tiempoInicial) + ", ");
+			
+			mc = new MatrizComprimida(new ArrayList<Rectangle>(conjuntoExpandido));
 			ModeloR modelo = new ModeloR(mc, 0.01);
+			
+			double tiempoInicialMod = System.currentTimeMillis();
+			
 			modelo.buildModel();
+			
+			output.append((System.currentTimeMillis() - tiempoInicialMod) + ", ");
+			
+			double tiempoInicialSolve = System.currentTimeMillis();
 			if (!modelo.solve())
 				throw new RuntimeException("No pudo mergear");
 			
+			output.append((System.currentTimeMillis() - tiempoInicialSolve) + ", ");
 			
 			Solucion s = new Solucion (m, modelo.getSolution().getRectangulos());
 			
-			if (!s.esValida())
-				throw new RuntimeException("solucion no valida");
+			//if (!s.esValida())
+			//	throw new RuntimeException("solucion no valida");
 			modelo.close();				
 			
-			System.out.println(path.getFileName().toString() + "heur: " + tam + " opti: " + s.getRectangulos().size());
+			output.append(s.getRectangulos().size());
+			out.write (output.toString() + "\n");
+			out.flush();
 			return;
 			
 //			List<List<Matriz>> mat = m.descomponer(8);

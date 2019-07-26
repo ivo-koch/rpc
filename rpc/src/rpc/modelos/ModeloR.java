@@ -33,6 +33,7 @@ public final class ModeloR {
 		cplex = new IloCplex();
 		cplex.setParam(IloCplex.IntParam.AdvInd, 0);
 		cplex.setParam(IloCplex.IntParam.Threads, 1);
+		cplex.setOut(null);
 	}
 
 	private Map<Rectangle, IloNumVar> variables = new HashMap<Rectangle, IloNumVar>();
