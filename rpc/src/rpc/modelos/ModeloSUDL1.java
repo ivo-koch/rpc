@@ -32,7 +32,7 @@ public final class ModeloSUDL1 extends Modelo {
 	@Override
 	public void buildModel() throws Exception {
 
-		System.out.println(matriz.toString());
+		//System.out.println(matriz.toString());
 		
 		int filas = matriz.filas();
 		int cols = matriz.columnas();

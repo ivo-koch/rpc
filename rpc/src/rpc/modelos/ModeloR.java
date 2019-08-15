@@ -68,7 +68,7 @@ public final class ModeloR {
 			cplex.addLe(1.0, rest);
 		}
 
-		cplex.exportModel("modelor.lp");
+		//cplex.exportModel("modelor.lp");
 	}
 
 	/**

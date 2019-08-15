@@ -24,7 +24,7 @@ public class ImportadorImagenes {
 		}
 		
 		FileSaver fs = new FileSaver(imp);
-		fs.saveAsTiff("/home/ik/git/rpc/rpc/instancias/bin/textures/" + path.getFileName().toString());
+		fs.saveAsTiff("/home/ik/git/rpc/rpc/instancias/bin/iconos/24x24" + path.getFileName().toString());
 		System.out.println("Binarizamos" + path.getFileName().toString());
 	}
 	
@@ -40,7 +40,7 @@ public class ImportadorImagenes {
 	public static void buildFileDesc() throws IOException {
 		builder = new StringBuilder();
 		
-		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin/aerials"))
+		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/nasa/nuevas"))
         .filter(Files::isRegularFile)
         .forEach(ImportadorImagenes::printDesc);
 		
@@ -57,7 +57,7 @@ public class ImportadorImagenes {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		buildFileDesc();
+		binarizarDir("/home/ik/git/rpc/rpc/instancias/iconos/24x24");
 	}
 	
 	public static Matriz importar(Path path) {

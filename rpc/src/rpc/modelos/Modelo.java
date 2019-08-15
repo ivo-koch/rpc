@@ -1,8 +1,6 @@
 package rpc.modelos;
 
-import java.awt.Rectangle;
 import java.io.OutputStream;
-import java.util.List;
 
 import org.jorlib.frameworks.columnGeneration.io.TimeLimitExceededException;
 
@@ -24,6 +22,7 @@ public abstract class Modelo {
 	protected long timeMillis;
 	// cota superior rectángulos.
 	protected int k;
+	protected InfoResolucion info = new InfoResolucion();
 
 	public Modelo(Matriz matrix, int k, double precision, OutputStream out) throws Exception {
 		this.matriz = matrix;
@@ -34,8 +33,11 @@ public abstract class Modelo {
 		cplex = new IloCplex();
 		cplex.setParam(IloCplex.IntParam.AdvInd, 0);
 		cplex.setParam(IloCplex.IntParam.Threads, 1);
-		if (out != null)
-			cplex.setOut(out);
+		// if (out != null)
+		cplex.setOut(out);
+		
+		CPLEXInfoCallBack infocallback = new CPLEXInfoCallBack(info);
+		cplex.use(infocallback);
 	}
 
 	public abstract void buildModel() throws Exception;
@@ -342,6 +344,12 @@ public abstract class Modelo {
 		return res;
 	}
 
+	public void buildModel(double timeLimit) throws Exception {
+
+		cplex.setParam(IloCplex.DoubleParam.TiLim, timeLimit);
+		buildModel();
+	}
+
 	/**
 	 * Método principal que resuelve el problema de pricing.
 	 * 
@@ -356,8 +364,8 @@ public abstract class Modelo {
 			// Resolvemos el problema
 			boolean resuelto = cplex.solve();
 			timeMillis = System.currentTimeMillis() - timeMillis;
-			
-			if (!resuelto || cplex.getStatus() != IloCplex.Status.Optimal) {				
+
+			if (!resuelto || cplex.getStatus() != IloCplex.Status.Optimal) {
 				this.objective = Double.MIN_VALUE;
 				return false;
 			} else { // Encontramos un óptimo
@@ -389,7 +397,16 @@ public abstract class Modelo {
 	}
 
 	public InfoResolucion info() throws IloException {
-		return new InfoResolucion(cplex.getStatus(), cplex.getNnodes(), cplex.getMIPRelativeGap(), timeMillis);
+		double gap = 0.0;
+		try {
+			gap = cplex.getMIPRelativeGap();
+		} catch (Exception e) {
+		}
+		info.gap = gap;
+		info.cplexStatus = cplex.getStatus();
+		info.nodos = cplex.getNnodes();
+		info.tiempoRes = timeMillis;				
+		return info;// return new InfoResolucion(cplex.getStatus(), cplex.getNnodes(), gap, timeMillis);
 	}
 
 }

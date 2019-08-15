@@ -154,7 +154,6 @@ public class Solucion {
 		return new Solucion(ampliada, res);
 	}
 	
-
 	
 	public Solucion mergeAbajo(Solucion s1, InfoResolucion info) throws Exception {
 

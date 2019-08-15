@@ -5,9 +5,12 @@ import ilog.cplex.IloCplex.Status;
 public class InfoResolucion {
 
 	public Status cplexStatus;
-	public int nodos;
+	public long nodos;
+	public long nodosCallback;
 	public double gap;
 	public long tiempoRes;
+	public int mejorSolEntera;
+	public double bestBound;	
 
 	public InfoResolucion() {
 	}
@@ -22,6 +25,6 @@ public class InfoResolucion {
 
 	@Override
 	public String toString() {
-		return cplexStatus.toString() + ", " + nodos + ", " + gap + ", " + tiempoRes;
+		return cplexStatus.toString() + ", " + gap + ", " + nodos + ", " + tiempoRes + ", " + mejorSolEntera + ", " + bestBound + ", " + nodosCallback;
 	}
 }
