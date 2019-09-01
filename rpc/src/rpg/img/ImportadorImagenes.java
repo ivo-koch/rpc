@@ -24,7 +24,7 @@ public class ImportadorImagenes {
 		}
 		
 		FileSaver fs = new FileSaver(imp);
-		fs.saveAsTiff("/home/ik/git/rpc/rpc/instancias/bin/iconos/24x24" + path.getFileName().toString());
+		fs.saveAsTiff("/home/ik/git/rpc/rpc/instancias/bin/iconos/10x10/" + path.getFileName().toString());
 		System.out.println("Binarizamos" + path.getFileName().toString());
 	}
 	
@@ -57,7 +57,7 @@ public class ImportadorImagenes {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		binarizarDir("/home/ik/git/rpc/rpc/instancias/iconos/24x24");
+		binarizarDir("/home/ik/git/rpc/rpc/instancias/iconos/10x10");
 	}
 	
 	public static Matriz importar(Path path) {

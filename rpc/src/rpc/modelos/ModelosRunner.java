@@ -18,15 +18,14 @@ import rpg.img.ImportadorImagenes;
 public class ModelosRunner {
 
 	private static Writer out = null;
-	//private static StringBuilder builder;
+	// private static StringBuilder builder;
 
 	public static void main(String[] args) throws Exception {
 
 		out = new FileWriter("salidaModelos");
 		out.write(
 				"Filas, Columnas, Cant. unos, ObjHeurSt, ObjHeurInv, ObjHeurInv2, ObjHeurInv3, ObjHeurSh, ModABCStatus, ModABCGap, ModABCNodos, ModABCTRes, ModABCMSolEnt, ModABCBBound, ModABCNodosCallback, ModABCObj, ModSUDLStatus, ModSUDLGap, ModSUDLNodos, ModSUDLTRes, ModSUDLSolEnt, ModSUDLBBound, ModSUDLNodosCallback, ModSUDLObj, ModRCStatus, ModRCGap, ModRCNodos, ModRCTRes, ModRCMSolEnt, ModRCBBound, ModRCNodosCallback, ModRCObj, ModXYStatus, ModXYGap, ModXYNodos, ModXYTRes, ModXYMSolEnt, ModXYBBound, ModXYNodosCallback, ModXYObj\n");
-
-		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin/iconos/24x24")).filter(Files::isRegularFile)
+		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin/iconos/16x16")).filter(Files::isRegularFile)
 				.forEach(t -> {
 					try {
 						printDesc(t);
@@ -36,12 +35,14 @@ public class ModelosRunner {
 					}
 				});
 
-		//Files.write(Paths.get("resultado.txt"), builder.toString().getBytes());
+		if (out != null)
+			out.close();
+		// Files.write(Paths.get("resultado.txt"), builder.toString().getBytes());
 	}
 
 	private static void printDesc(Path path) throws Exception {
 
-		double timeLimit = 1800;
+		double timeLimit = 900;
 		Matriz matrix = ImportadorImagenes.importar(path);
 
 		List<Rectangle> sol = matrix.coverStandard();
@@ -55,16 +56,19 @@ public class ModelosRunner {
 		conjuntoExpandido.addAll(matrix.coverInv3());
 		conjuntoExpandido.addAll(matrix.coverShuffle());
 		mc = new MatrizComprimida(new ArrayList<Rectangle>(conjuntoExpandido));
-		
+
 		ModeloR modelo = new ModeloR(mc, 0.01);
 		modelo.buildModel();
 		if (!modelo.solve())
 			throw new RuntimeException("No pudo resolver");
 
+		
 		out.write(matrix.filas() + ", " + matrix.columnas() + ", " + matrix.cantUnos() + ", "
 				+ modelo.getSolution().getRectangulos().size() + ", " + 0 + ", " + 0 + ", " + 0 + ", " + 0 + ", ");
 		out.flush();
 
+		modelo.close();
+		
 		ModeloABC modeloABC = new ModeloABC(matrix, solH, null);
 		modeloABC.buildModel(timeLimit);
 		modeloABC.solve();
@@ -99,9 +103,6 @@ public class ModelosRunner {
 		out.write(info.toString() + ", " + modeloXY.getObjective() + "\n");
 		out.flush();
 		modeloXY.close();
-
-		if (out != null)
-			out.close();
 	}
 
 	// public static void main(String[] args) throws Exception {

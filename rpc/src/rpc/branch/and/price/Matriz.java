@@ -9,6 +9,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ilog.concert.IloException;
+import ilog.cplex.IloCplex.UnknownObjectException;
+import rpc.modelos.ModeloMaximal;
+
 public class Matriz {
 
 	private final boolean[][] matrix;
@@ -157,6 +161,17 @@ public class Matriz {
 		return buildMaximal(new Rectangle(p.x, p.y, 1, 1));
 	}
 
+	public Rectangle buildMaximalMip(Point p) throws Exception {
+
+		ModeloMaximal mm = new ModeloMaximal(this, p, null);
+		mm.buildModel();
+		if (!mm.solve())
+			throw new RuntimeException("El modelo no resolvió");
+		Rectangle r = mm.getSolution();
+		mm.close();
+		return r;
+	}
+
 	public boolean todosUnos(int f, int c, int width, int height) {
 
 		for (int f1 = f; f1 < f + height; f1++)
@@ -265,7 +280,7 @@ public class Matriz {
 		for (int c = 0; c < columnas(); c++)
 			columnas[c] = c;
 
-		return cover(filas, columnas);
+		return cover(filas, columnas, false);
 	}
 
 	public List<Rectangle> coverInv() {
@@ -278,7 +293,7 @@ public class Matriz {
 		for (int c = 0; c < columnas(); c++)
 			columnas[c] = columnas() - 1 - c;
 
-		return cover(filas, columnas);
+		return cover(filas, columnas, false);
 	}
 
 	public List<Rectangle> coverInv2() {
@@ -291,9 +306,9 @@ public class Matriz {
 		for (int c = 0; c < columnas(); c++)
 			columnas[c] = columnas() - 1 - c;
 
-		return cover(filas, columnas);
+		return cover(filas, columnas, false);
 	}
-	
+
 	public List<Rectangle> coverInv3() {
 		Integer[] filas = new Integer[filas()];
 		Integer[] columnas = new Integer[columnas()];
@@ -304,8 +319,9 @@ public class Matriz {
 		for (int c = 0; c < columnas(); c++)
 			columnas[c] = c;
 
-		return cover(filas, columnas);
+		return cover(filas, columnas, false);
 	}
+
 	public List<Rectangle> coverShuffle() {
 
 		Integer[] filas = new Integer[filas()];
@@ -323,11 +339,86 @@ public class Matriz {
 		List<Integer> cList = Arrays.asList(columnas);
 		Collections.shuffle(cList);
 
-		return cover(fList.toArray(filas), cList.toArray(columnas));
+		return cover(fList.toArray(filas), cList.toArray(columnas), false);
 
 	}
 
-	private List<Rectangle> cover(Integer[] filas, Integer[] columnas) {
+	public List<Rectangle> coverStandardM() {
+		Integer[] filas = new Integer[filas()];
+		Integer[] columnas = new Integer[columnas()];
+
+		for (int f = 0; f < filas(); f++)
+			filas[f] = f;
+
+		for (int c = 0; c < columnas(); c++)
+			columnas[c] = c;
+
+		return cover(filas, columnas, true);
+	}
+
+	public List<Rectangle> coverInvM() {
+		Integer[] filas = new Integer[filas()];
+		Integer[] columnas = new Integer[columnas()];
+
+		for (int f = 0; f < filas(); f++)
+			filas[f] = filas() - 1 - f;
+
+		for (int c = 0; c < columnas(); c++)
+			columnas[c] = columnas() - 1 - c;
+
+		return cover(filas, columnas, true);
+	}
+
+	public List<Rectangle> coverInv2M() {
+		Integer[] filas = new Integer[filas()];
+		Integer[] columnas = new Integer[columnas()];
+
+		for (int f = 0; f < filas(); f++)
+			filas[f] = f;
+
+		for (int c = 0; c < columnas(); c++)
+			columnas[c] = columnas() - 1 - c;
+
+		return cover(filas, columnas, true);
+	}
+
+	public List<Rectangle> coverInv3M() {
+		Integer[] filas = new Integer[filas()];
+		Integer[] columnas = new Integer[columnas()];
+
+		for (int f = 0; f < filas(); f++)
+			filas[f] = filas() - 1 - f;
+
+		for (int c = 0; c < columnas(); c++)
+			columnas[c] = c;
+
+		return cover(filas, columnas, true);
+	}
+
+	public List<Rectangle> coverShuffleM() {
+
+		Integer[] filas = new Integer[filas()];
+		Integer[] columnas = new Integer[columnas()];
+
+		for (int f = 0; f < filas(); f++)
+			filas[f] = f;
+
+		for (int c = 0; c < columnas(); c++)
+			columnas[c] = c;
+
+		List<Integer> fList = Arrays.asList(filas);
+		Collections.shuffle(fList);
+
+		List<Integer> cList = Arrays.asList(columnas);
+		Collections.shuffle(cList);
+
+		return cover(fList.toArray(filas), cList.toArray(columnas), true);
+
+	}
+
+	public MaximumRectangleFinder mrf = new MaximumRectangleFinder(this);
+	
+	private List<Rectangle> cover(Integer[] filas, Integer[] columnas, boolean maximum) {
 		List<Rectangle> sol = new ArrayList<Rectangle>();
 
 		boolean[][] unosCubiertos = new boolean[filas()][columnas()];
@@ -338,7 +429,7 @@ public class Matriz {
 
 		for (Point p : unos())
 			unosPorFilas[p.y]++;
-
+		
 		while (cantUnosCubiertos < cantUnos()) {
 
 			int fila = -1;
@@ -351,13 +442,19 @@ public class Matriz {
 			Point p = null;
 
 			for (int c = 0; c < columnas(); c++)
-				if (!unosCubiertos[fila][columnas[c]] && this.get(fila, columnas[c]))
-				{
+				if (!unosCubiertos[fila][columnas[c]] && this.get(fila, columnas[c])) {
 					p = new Point(columnas[c], fila);
 					break;
 				}
-
-			Rectangle r = buildMaximal(p);
+			
+			Rectangle r;
+			try {
+				r = maximum ? mrf.maximumRectangle(p) : buildMaximal(p);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new RuntimeException("Ocurrio una cagada");
+			}
 
 			for (int f = r.y; f < r.y + r.height; f++)
 				for (int c = r.x; c < r.x + r.width; c++) {
