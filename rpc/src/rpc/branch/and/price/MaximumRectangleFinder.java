@@ -255,7 +255,7 @@ public class MaximumRectangleFinder {
 		}
 	}
 
-	private final int limiteRectsPorPto = 5;
+	private final int limiteRectsPorPto = 1;
 
 	public void buscarRC1() {
 		

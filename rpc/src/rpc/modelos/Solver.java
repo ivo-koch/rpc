@@ -33,7 +33,7 @@ public class Solver {
 				"Dir, Nombre, Filas, Columnas, Cant. unos, Heur st, Heur inv, Heur inv2, Heur inv3, Heur sh, Theur, TbuilM, Tsolve, Model \n");
 		// Heur: out.write("Dir, Nombre, Filas, Columnas, Cant. unos, Heur st, Heur inv,
 		// Heur inv2, Heur inv3, Heur sh, Theur, TbuilM, Tsolve, Model \n");
-		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin/nasa/factibles")).filter(Files::isRegularFile)
+		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin/iconos/14x14")).filter(Files::isRegularFile)
 				.forEach(Solver::resolverConHeur2);
 
 		if (out != null)
@@ -136,6 +136,7 @@ public class Solver {
 			e.printStackTrace();
 		}
 	}
+	
 	private static void resolverConHeur(Path path) {
 
 		try {
