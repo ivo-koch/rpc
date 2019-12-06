@@ -102,11 +102,11 @@ public final class ModeloMaximal {
 
 		// subto puntoCubierto:
 		// x[pr, pc] == 1;_
-
-		IloNumExpr resP = cplex.linearIntExpr();
-		resP = cplex.sum(resP, cplex.prod(1.0, x[p.y][p.x]));
-		cplex.addEq(1.0, resP);
-
+//
+//		IloNumExpr resP = cplex.linearIntExpr();
+//		resP = cplex.sum(resP, cplex.prod(1.0, x[p.y][p.x]));
+//		cplex.addEq(1.0, resP);
+//
 		// subto ningun0Cubierto: forall <i,j> in R*C with M[i, j] == 0:
 		// 0 == x[i, j];
 

@@ -2,7 +2,9 @@ package tests;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import rpc.branch.and.price.Matriz;
@@ -30,5 +32,15 @@ public class MatrixGenerator {
 
 		return new Matriz(res);
 	}
-		
+
+	public static Map<Point, Double> generateRandomWeights(Matriz m) {
+
+		Map<Point, Double> res = new HashMap<Point, Double>();
+		Random r = new Random(0);
+		for (Point p : m.unos())
+			res.put(p, new Double(r.nextInt()));
+
+		return res;
+	}
+
 }

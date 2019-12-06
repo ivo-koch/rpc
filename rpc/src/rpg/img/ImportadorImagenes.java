@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.io.FileSaver;
 import ij.process.ImageProcessor;
 import rpc.branch.and.price.Matriz;
@@ -19,12 +20,13 @@ public class ImportadorImagenes {
 		
 		if (!imageProcessor.isBinary()) {
 			IJ.setRawThreshold(imp, 50, 255, null);
-			//Prefs.blackBackground = true;
+			//IJ.setThreshold(imp, 0, 0, "Black & White");
+			//Prefs.blackBackground = false;
 			IJ.run(imp, "Convert to Mask", "");
 		}
 		
 		FileSaver fs = new FileSaver(imp);
-		fs.saveAsTiff("/home/ik/git/rpc/rpc/instancias/bin/iconos/10x10/" + path.getFileName().toString());
+		fs.saveAsTiff("/home/ik/git/rpc/rpc/instancias/bin/tiff" + path.getFileName().toString());
 		System.out.println("Binarizamos" + path.getFileName().toString());
 	}
 	
@@ -40,7 +42,7 @@ public class ImportadorImagenes {
 	public static void buildFileDesc() throws IOException {
 		builder = new StringBuilder();
 		
-		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/nasa/nuevas"))
+		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/tiff/CCITT1.png"))
         .filter(Files::isRegularFile)
         .forEach(ImportadorImagenes::printDesc);
 		
@@ -57,7 +59,7 @@ public class ImportadorImagenes {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		binarizarDir("/home/ik/git/rpc/rpc/instancias/iconos/10x10");
+		binarizarDir("/home/ik/git/rpc/rpc/instancias/tiff/png/");
 	}
 	
 	public static Matriz importar(Path path) {
@@ -76,6 +78,7 @@ public class ImportadorImagenes {
 			for (int v = 0; v < height; v++) {
 				int valuePixel = imageProcessor.getPixel(u, v);				
 					matriz[v][u] = valuePixel > 0;
+					//matriz[v][u] = valuePixel <= 0;
 			}
 		}
 		

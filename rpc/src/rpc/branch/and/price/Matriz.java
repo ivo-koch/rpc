@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import ilog.concert.IloException;
@@ -135,15 +136,32 @@ public class Matriz {
 		return maximals;
 	}
 
-	public double weight(Rectangle r, double[] coef) {
+	public Set<Rectangle> allMaximals(Point p) {
+
+		Set<Rectangle> maximals = allMaximals();
+		Set<Rectangle> res = new HashSet<Rectangle>();
+
+		for (Rectangle r : maximals)
+			if (r.contains(p))
+				res.add(r);
+
+		return res;
+	}
+
+	/***
+	 * Los pesos deben venir en el orden de los unos que nos da unos().
+	 * 
+	 * @param r
+	 * @param coef
+	 * @return
+	 */
+	public double weight(Rectangle r, Map<Point, Double> coef) {
 
 		double weight = 0;
-		int i = 0;
-		for (Point p : unos()) {
-			if (r.contains(p))
-				weight += coef[i];
-			i++;
-		}
+
+		for (int f = r.y; f < r.y + r.height; f++)
+			for (int c = r.x; c < r.x + r.width; c++)
+				weight += coef.get(new Point(c, f));
 
 		return weight;
 	}
@@ -416,8 +434,8 @@ public class Matriz {
 
 	}
 
-	public MaximumRectangleFinder mrf = new MaximumRectangleFinder(this);
-	
+	public MaximalRectangleFinder mrf = new MaximalRectangleFinder(this);
+
 	private List<Rectangle> cover(Integer[] filas, Integer[] columnas, boolean maximum) {
 		List<Rectangle> sol = new ArrayList<Rectangle>();
 
@@ -429,7 +447,7 @@ public class Matriz {
 
 		for (Point p : unos())
 			unosPorFilas[p.y]++;
-		
+
 		while (cantUnosCubiertos < cantUnos()) {
 
 			int fila = -1;
@@ -446,7 +464,7 @@ public class Matriz {
 					p = new Point(columnas[c], fila);
 					break;
 				}
-			
+
 			Rectangle r;
 			try {
 				r = maximum ? mrf.maximumRectangle(p) : buildMaximal(p);

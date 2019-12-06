@@ -83,19 +83,19 @@ public final class ModeloSUDL1 extends Modelo {
 								cplex.prod(-1.0, left[f][c][r])));
 		});
 
-//		subto siempreHayStart1: forall <i,j, k> in R*C*K:
-//			left[i, j, k] + diag[i, j, k] + up[i, j, k]  <= sum <i1, j1> in R*C:start[i1, j1, k];
-		forall((f, c, r) -> {
-			addLe(0.0, "siempreHayStart1",
-
-					sum(cplex.prod(-1.0, left[f][c][r]), 
-						cplex.prod(-1.0, diag[f][c][r]), 
-						cplex.prod(-1.0, up[f][c][r]),
-							sum((f1, c1) -> {
-								return cplex.prod(1.0, start[f1][c1][r]);
-							})));
-		});
-		
+////		subto siempreHayStart1: forall <i,j, k> in R*C*K:
+////			left[i, j, k] + diag[i, j, k] + up[i, j, k]  <= sum <i1, j1> in R*C:start[i1, j1, k];
+//		forall((f, c, r) -> {
+//			addLe(0.0, "siempreHayStart1",
+//
+//					sum(cplex.prod(-1.0, left[f][c][r]), 
+//						cplex.prod(-1.0, diag[f][c][r]), 
+//						cplex.prod(-1.0, up[f][c][r]),
+//							sum((f1, c1) -> {
+//								return cplex.prod(1.0, start[f1][c1][r]);
+//							})));
+//		});
+//		
 //		subto unStartPorRect: forall <k> in K:
 //			(sum <i,j> in R*C: start[i, j, k]) <= 1;
 		forall((r) -> {

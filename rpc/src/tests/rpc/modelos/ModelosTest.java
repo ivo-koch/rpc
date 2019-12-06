@@ -3,12 +3,13 @@ package tests.rpc.modelos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Rectangle;
+
 import org.jorlib.frameworks.columnGeneration.io.TimeLimitExceededException;
 import org.junit.jupiter.api.Test;
 
 import rpc.branch.and.price.Matriz;
-import rpc.modelos.ModeloABC;
-import rpc.modelos.ModeloRC;
+import rpc.modelos.ModeloMaximal;
 import rpc.modelos.ModeloSUDL1;
 import rpc.modelos.ModeloXY;
 import tests.MatrixGenerator;
@@ -18,12 +19,21 @@ class ModelosTest {
 	@Test
 	void testSolve() throws Exception {
 
-		for (int f = 3; f < 8; f++)
-			for (int c = 3; c < 8; c++)
-				for (int density = 10; density < 100; density += 10) {
+		for (int f = 20; f < 50; f+=5)
+			for (int c = 20; c < 50; c+=5)
+				for (int density = 20; density < 100; density += 20) {
 					Matriz matrix = MatrixGenerator.generateRandomMatrix(f, c, density);
-					System.out.println(matrix);
-					resolverModelos(matrix);
+					//System.out.println(matrix);
+					//resolverModelos(matrix);
+
+					ModeloMaximal mm = new ModeloMaximal(matrix, null, null);
+					mm.buildModel();
+					if (!mm.solve())
+						throw new RuntimeException("El modelo no resolvió");
+					
+					System.out.println("Resolvimos f:" + f + "c:" + c + "d:" + density);
+					//Rectangle r = mm.getSolution();
+					mm.close();
 				}
 	}
 
@@ -89,7 +99,7 @@ class ModelosTest {
 		double sol4 = modelo4.getObjective();
 		modelo4.close();
 
-		ModeloXY modelo5 = new ModeloXY(matrix, maximales);
+		ModeloSUDL1 modelo5 = new ModeloSUDL1(matrix, maximales);
 		modelo5.buildModel();
 		assertTrue(modelo5.solve());
 		assertTrue(modelo5.getSolution().esValida());

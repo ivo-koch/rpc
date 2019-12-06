@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -17,6 +19,30 @@ import rpc.modelos.Solucion;
 import tests.MatrixGenerator;
 
 class MatrizTests {
+	
+	@Test
+	void testWeights() {
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("0 1 0 1 0 0 1\n");
+		sb.append("0 1 1 1 1 0 1\n");
+		sb.append("1 1 1 1 1 0 1\n");
+		sb.append("0 1 1 1 1 0 1\n");
+		sb.append("0 1 0 1 0 0 1\n");
+		sb.append("0 1 0 1 0 0 1\n");
+
+		Rectangle r = new Rectangle(1, 1, 4, 3);
+		Matriz m = new Matriz(sb.toString());
+		
+		Map<Point, Double> res = new HashMap<Point, Double>();
+		
+		int i = 1;
+		for (Point p : m.unos())
+			res.put(p, (double) i++);
+				
+		assertEquals(m.weight(r, res), 134.0);
+		
+	}
 
 	//@Test
 	void testIsMaximal() {
@@ -168,7 +194,7 @@ class MatrizTests {
 
 	}
 	
-	@Test
+	//@Test
 	void testHeurCover4() {
 
 		StringBuilder sb = new StringBuilder();
@@ -200,7 +226,7 @@ class MatrizTests {
 	}
 
 
-	@Test
+	//@Test
 	void testHeurCover2() {
 
 		for (int f = 10; f < 150; f++)

@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MaximumRectangleFinder {
+public class MaximalRectangleFinder {
 
 	private Matriz matriz;
 	private Point p;
@@ -33,7 +33,7 @@ public class MaximumRectangleFinder {
 	public int[] c3Y;
 	public int[] c4Y;
 
-	public MaximumRectangleFinder(Matriz m) {
+	public MaximalRectangleFinder(Matriz m) {
 		this.matriz = m;
 
 	}
@@ -255,7 +255,7 @@ public class MaximumRectangleFinder {
 		}
 	}
 
-	private final int limiteRectsPorPto = 1;
+	public static int limiteRectsPorPto = 1;
 
 	public void buscarRC1() {
 		
@@ -450,6 +450,7 @@ public class MaximumRectangleFinder {
 
 	public void buscarRC4() {		
 		for (Point p4 : c4P) {
+			
 			int topX = p4.x;
 			int topY = Math.max(c1Y(topX), c2Y(c3X(p4.y)));
 

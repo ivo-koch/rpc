@@ -10,7 +10,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import rpc.branch.and.price.Matriz;
-import rpc.branch.and.price.MaximumRectangleFinder;
+import rpc.branch.and.price.MaximalRectangleFinder;
 import tests.MatrixGenerator;
 
 class MaximumRectangleTest {
@@ -28,7 +28,7 @@ class MaximumRectangleTest {
 
 		Matriz m = new Matriz(sb.toString());
 		
-		MaximumRectangleFinder mrf = new MaximumRectangleFinder(m);
+		MaximalRectangleFinder mrf = new MaximalRectangleFinder(m);
 				
 		Rectangle r = mrf.maximumRectangle(new Point (3, 3));
 		

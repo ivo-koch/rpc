@@ -16,6 +16,7 @@ import java.util.Set;
 
 import rpc.branch.and.price.Matriz;
 import rpc.branch.and.price.MatrizComprimida;
+import rpc.branch.and.price.MaximalRectangleFinder;
 import rpg.img.ImportadorImagenes;
 
 public class Solver {
@@ -33,7 +34,7 @@ public class Solver {
 				"Dir, Nombre, Filas, Columnas, Cant. unos, Heur st, Heur inv, Heur inv2, Heur inv3, Heur sh, Theur, TbuilM, Tsolve, Model \n");
 		// Heur: out.write("Dir, Nombre, Filas, Columnas, Cant. unos, Heur st, Heur inv,
 		// Heur inv2, Heur inv3, Heur sh, Theur, TbuilM, Tsolve, Model \n");
-		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin/iconos/14x14")).filter(Files::isRegularFile)
+		Files.walk(Paths.get("/home/ik/git/rpc/rpc/instancias/bin/tiff")).filter(Files::isRegularFile)
 				.forEach(Solver::resolverConHeur2);
 
 		if (out != null)
@@ -67,76 +68,84 @@ public class Solver {
 		}
 	}
 
-
 	private static void resolverConHeur2(Path path) {
 
 		try {
-			StringBuilder output = new StringBuilder();
-
-			Matriz m = ImportadorImagenes.importar(path);
-
-			output.append(path.getParent() + ", ");
-			output.append(path.getFileName().toString() + ", ");
-			output.append(m.filas() + ", " + m.columnas() + ", " + m.cantUnos() + ", ");
-			long tiempoInicial = System.currentTimeMillis();
-
-			List<Rectangle> sol = m.coverStandardM();
-			// Solucion nueva = new Solucion(m, sol);
-			// if (!nueva.esValida())
-			// throw new RuntimeException("solucion no valida");
-
-			MatrizComprimida mc = new MatrizComprimida(sol);
-			Set<Rectangle> conjuntoExpandido = new HashSet<Rectangle>(sol);
-			output.append(conjuntoExpandido.size() + ", ");
 			
-			conjuntoExpandido.addAll(m.mrf.rectsAcum);
-/*
-			conjuntoExpandido.addAll(m.coverInvM());*/
-			output.append(conjuntoExpandido.size() + ", ");
-/*
-			conjuntoExpandido.addAll(m.coverInv2M());
-			output.append(conjuntoExpandido.size() + ", ");
+			for (int k = 1; k < 11; k ++) {
+				StringBuilder output = new StringBuilder();
 
-			conjuntoExpandido.addAll(m.coverInv3M());
-			output.append(conjuntoExpandido.size() + ", ");
+				MaximalRectangleFinder.limiteRectsPorPto = k;
+				
+				Matriz m = ImportadorImagenes.importar(path);
+				
+				output.append(k + ", ");
+				output.append(path.getParent() + ", ");
+				output.append(path.getFileName().toString() + ", ");
+				output.append(m.filas() + ", " + m.columnas() + ", " + m.cantUnos() + ", ");
+				long tiempoInicial = System.currentTimeMillis();
 
-			conjuntoExpandido.addAll(m.coverShuffleM());
-			output.append(conjuntoExpandido.size() + ", ");*/
+				List<Rectangle> sol = m.coverStandardM();
+				// Solucion nueva = new Solucion(m, sol);
+				// if (!nueva.esValida())
+				// throw new RuntimeException("solucion no valida");
 
-			output.append((System.currentTimeMillis() - tiempoInicial) + ", ");
+				MatrizComprimida mc = new MatrizComprimida(sol);
+				
+				Set<Rectangle> conjuntoExpandido = new HashSet<Rectangle>(sol);
+				output.append(conjuntoExpandido.size() + ", ");
 
-			mc = new MatrizComprimida(new ArrayList<Rectangle>(conjuntoExpandido));
-			ModeloR modelo = new ModeloR(mc, 0.01);
+				conjuntoExpandido.addAll(m.mrf.rectsAcum);
+				/*
+				 * conjuntoExpandido.addAll(m.coverInvM());
+				 */
+				output.append(conjuntoExpandido.size() + ", ");
+				/*
+				 * conjuntoExpandido.addAll(m.coverInv2M());
+				 * output.append(conjuntoExpandido.size() + ", ");
+				 * 
+				 * conjuntoExpandido.addAll(m.coverInv3M());
+				 * output.append(conjuntoExpandido.size() + ", ");
+				 * 
+				 * conjuntoExpandido.addAll(m.coverShuffleM());
+				 * output.append(conjuntoExpandido.size() + ", ");
+				 */
 
-			double tiempoInicialMod = System.currentTimeMillis();
+				output.append((System.currentTimeMillis() - tiempoInicial) + ", ");
 
-			modelo.buildModel();
+				mc = new MatrizComprimida(new ArrayList<Rectangle>(conjuntoExpandido));
+				ModeloR modelo = new ModeloR(mc, 0.01);
 
-			output.append((System.currentTimeMillis() - tiempoInicialMod) + ", ");
+				double tiempoInicialMod = System.currentTimeMillis();
 
-			double tiempoInicialSolve = System.currentTimeMillis();
-			if (!modelo.solve())
-				throw new RuntimeException("No pudo mergear");
+				modelo.buildModel();
 
-			output.append((System.currentTimeMillis() - tiempoInicialSolve) + ", ");
+				output.append((System.currentTimeMillis() - tiempoInicialMod) + ", ");
 
-			Solucion s = new Solucion(m, modelo.getSolution().getRectangulos());
+				double tiempoInicialSolve = System.currentTimeMillis();
+				if (!modelo.solve())
+					throw new RuntimeException("No pudo mergear");
 
-			// if (!s.esValida())
-			// throw new RuntimeException("solucion no valida");
-			modelo.close();
+				output.append((System.currentTimeMillis() - tiempoInicialSolve) + ", ");
 
-			output.append(s.getRectangulos().size());
-			System.out.println("Resolvimos " + path.getFileName().toString());
-			out.write(output.toString() + "\n");
-			out.flush();
+				Solucion s = new Solucion(m, modelo.getSolution().getRectangulos());
+
+				// if (!s.esValida())
+				// throw new RuntimeException("solucion no valida");
+				modelo.close();
+
+				output.append(s.getRectangulos().size());
+				System.out.println("Resolvimos " + path.getFileName().toString());
+				out.write(output.toString() + "\n");
+				out.flush();
+			}
 			return;
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static void resolverConHeur(Path path) {
 
 		try {
@@ -157,18 +166,19 @@ public class Solver {
 			MatrizComprimida mc = new MatrizComprimida(sol);
 			Set<Rectangle> conjuntoExpandido = new HashSet<Rectangle>(sol);
 			output.append(conjuntoExpandido.size() + ", ");
-/*
-			conjuntoExpandido.addAll(m.coverInv());
-			output.append(conjuntoExpandido.size() + ", ");
-
-			conjuntoExpandido.addAll(m.coverInv2());
-			output.append(conjuntoExpandido.size() + ", ");
-
-			conjuntoExpandido.addAll(m.coverInv3());
-			output.append(conjuntoExpandido.size() + ", ");
-
-			conjuntoExpandido.addAll(m.coverShuffle());
-			output.append(conjuntoExpandido.size() + ", ");*/
+			/*
+			 * conjuntoExpandido.addAll(m.coverInv());
+			 * output.append(conjuntoExpandido.size() + ", ");
+			 * 
+			 * conjuntoExpandido.addAll(m.coverInv2());
+			 * output.append(conjuntoExpandido.size() + ", ");
+			 * 
+			 * conjuntoExpandido.addAll(m.coverInv3());
+			 * output.append(conjuntoExpandido.size() + ", ");
+			 * 
+			 * conjuntoExpandido.addAll(m.coverShuffle());
+			 * output.append(conjuntoExpandido.size() + ", ");
+			 */
 
 			output.append((System.currentTimeMillis() - tiempoInicial) + ", ");
 
