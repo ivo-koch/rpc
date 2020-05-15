@@ -33,7 +33,7 @@ public abstract class Modelo {
 		cplex = new IloCplex();
 		cplex.setParam(IloCplex.IntParam.AdvInd, 0);
 		cplex.setParam(IloCplex.IntParam.Threads, 1);
-		// if (out != null)
+		 if (out != null)
 		cplex.setOut(out);
 		
 		CPLEXInfoCallBack infocallback = new CPLEXInfoCallBack(info);

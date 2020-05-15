@@ -19,21 +19,23 @@ class ModelosTest {
 	@Test
 	void testSolve() throws Exception {
 
-		for (int f = 20; f < 50; f+=5)
-			for (int c = 20; c < 50; c+=5)
+		for (int f = 5; f < 10; f++)
+			for (int c = 5; c < 10; c++)
 				for (int density = 20; density < 100; density += 20) {
 					Matriz matrix = MatrixGenerator.generateRandomMatrix(f, c, density);
-					//System.out.println(matrix);
-					//resolverModelos(matrix);
+					System.out.println(matrix);
+					
+				
+					resolverModelos(matrix);
 
-					ModeloMaximal mm = new ModeloMaximal(matrix, null, null);
+					/*ModeloMaximal mm = new ModeloMaximal(matrix, null, null);
 					mm.buildModel();
 					if (!mm.solve())
 						throw new RuntimeException("El modelo no resolvió");
 					
 					System.out.println("Resolvimos f:" + f + "c:" + c + "d:" + density);
 					//Rectangle r = mm.getSolution();
-					mm.close();
+					mm.close();*/
 				}
 	}
 

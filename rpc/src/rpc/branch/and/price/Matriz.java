@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ilog.concert.IloException;
-import ilog.cplex.IloCplex.UnknownObjectException;
 import rpc.modelos.ModeloMaximal;
 
 public class Matriz {
@@ -136,12 +134,52 @@ public class Matriz {
 		return maximals;
 	}
 
+	public Rectangle pixelsMaxRectangle() {
+
+		Set<Rectangle> maximals = allMaximals();
+
+		Rectangle res = null;
+		// genero todos los subrectángulos
+		for (Rectangle r : allMaximals())
+			if (res == null || r.height * r.width > res.width * res.height)
+				res = r;
+
+		return res;
+	}
+
+	public Set<Rectangle> allRects() {
+
+		Set<Rectangle> allRects = new HashSet<Rectangle>();
+
+		// genero todos los subrectángulos
+		for (int f = 0; f < filas(); f++)
+			for (int c = 0; c < columnas(); c++)
+				for (int f1 = f; f1 < filas(); f1++)
+					for (int c1 = c; c1 < columnas(); c1++) {
+						Rectangle r = new Rectangle(c, f, c1 - c + 1, f1 - f + 1);
+						if (todosUnos(r))
+							allRects.add(r);
+					}
+		return allRects;
+	}
+
 	public Set<Rectangle> allMaximals(Point p) {
 
 		Set<Rectangle> maximals = allMaximals();
 		Set<Rectangle> res = new HashSet<Rectangle>();
 
 		for (Rectangle r : maximals)
+			if (r.contains(p))
+				res.add(r);
+
+		return res;
+	}
+
+	public Set<Rectangle> allRects(Set<Rectangle> rects, Point p) {
+
+		Set<Rectangle> res = new HashSet<Rectangle>();
+
+		for (Rectangle r : rects)
 			if (r.contains(p))
 				res.add(r);
 
@@ -532,4 +570,5 @@ public class Matriz {
 	public Rectangle getLimite() {
 		return limite;
 	}
+
 }
